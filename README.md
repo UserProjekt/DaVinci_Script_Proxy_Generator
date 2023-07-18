@@ -68,10 +68,12 @@ In our Adobe PremierePro-based workflow，We place the Proxy folder alongside th
     - 📁 Shooting Day 2
       - 📁 A002_0210Z9
 
+
 ### Example
 --------------
 Upon invocation of this script, the terminal prompts the user to provide the paths for the footage folder and the proxy folder.
 <img width="682" alt="Screenshot 2023-07-18 at 22 15 33" src="https://github.com/UserProjekt/DaVinciScript-ProxyTranscoder/assets/78477492/14de004d-6fe1-4ad0-910d-56007d9cc395">
+
 After the paths are inputted, DaVinci Resolve initiates the process of importing video files, categorizing Clips and creating timelines based on aspect ratios. Subsequently, the script re-establishes the date-based folder structure within the Proxy folder, This then serves as the target location for the ensuing transcoding.
 <img width="1556" alt="Screenshot 2023-07-18 at 23 16 58" src="https://github.com/UserProjekt/DaVinciScript-ProxyTranscoder/assets/78477492/dee01bb2-9adb-4e06-99f6-2d580db51d8a">
 
