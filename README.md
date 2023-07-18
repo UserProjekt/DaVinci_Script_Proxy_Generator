@@ -1,12 +1,6 @@
 # DaVinci_Script_Proxy_generator
 
-This script, written in Python for DaVinci Resolve, automates the process of importing video footage. It categorizes the footage based on the video aspect ratio and subsequently transcodes it to an approximate resolution of 1920x1080 using Render Presets. This script employs a custom preset titled 'FHD_h.265_420_8bit_5Mbps'. This preset corresponds to Full High Definition (FHD) video with H.265 encoding, 4:2:0 chroma subsampling, 8-bit color depth, and a bitrate of 5Mbps. These settings are optimized for hardware decoding and systems with low I/O performance, resulting in decreased storage requirements.
-
-Original footage, especially when captured in high-resolution formats such as 4K, 6K, or 8K, is aimed at achieving the best possible image quality. These formats offer greater detail, higher dynamic range, and more flexibility for visual effects, color grading, cropping, and other post-production processes. High-resolution footage can also future-proof a project, allowing it to maintain its quality as display technologies improve over time.
-
-However, the high data rate and larger file sizes of these formats can make the footage difficult to work with during the editing process, particularly on a system with weak I/O performance. It can slow down the editing software, make playback choppy or unresponsive, and consume significant storage space.
-
-This is why a proxy workflow is often used. The editor can work with lower-resolution proxy files that are easier and faster to handle during the editing process, while the high-resolution original footage is used for the final render.
+This script, written in Python for DaVinci Resolve, automates the process of importing video footage. It categorizes the footage based on the video aspect ratio and subsequently transcodes it to an approximate resolution of 1920x1080 using Render Presets. This script employs a custom preset titled 'FHD_h.265_420_8bit_5Mbps'. This preset corresponds to Full High Definition (FHD) video with H.265 encoding, 4:2:0 chroma subsampling, 8-bit color depth, and a bitrate of 5Mbps. These settings are optimized for hardware decoding and systems with low I/O performance, resulting in decreased storage space.
   
 ## Prerequisites and Usage
 Excerpted from the "Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt”
