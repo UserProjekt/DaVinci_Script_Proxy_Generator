@@ -46,7 +46,8 @@ You may need to set the these environment variables to allow for your Python ins
 
 
 
-### Folder Structure 
+### Folder Structure
+--------------
 Common Footage folder structure like this
 - 📁 Production
   - 📁 Footage
@@ -68,7 +69,7 @@ In our Adobe PremierePro-based workflow，We place the Proxy folder alongside th
       - 📁 A002_0210Z9
 
 
-
+--------------
 Upon invocation of this script, the terminal prompts the user to provide the paths for the footage folder and the proxy folder.
 <img width="682" alt="Screenshot 2023-07-18 at 22 15 33" src="https://github.com/UserProjekt/DaVinciScript-ProxyTranscoder/assets/78477492/14de004d-6fe1-4ad0-910d-56007d9cc395">
 
