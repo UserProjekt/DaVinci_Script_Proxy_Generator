@@ -68,7 +68,6 @@ In our Adobe PremierePro-based workflow，We place the Proxy folder alongside th
 
 ### Example
 Please ensure that no project titled 'Proxy' exists within the DaVinci Resolve Project Manager.
-<img width="906" alt="Screenshot 2023-07-19 at 00 52 02" src="https://github.com/UserProjekt/DaVinci_Script_Proxy_generator/assets/78477492/181e63d4-9083-4d55-b5ac-5490e4b4512e">
 
 Upon invocation of this script, the terminal prompts the user to provide the paths for the footage folder and the proxy folder.
  <img width="682" alt="Screenshot 2023-07-18 at 22 15 33" src="https://github.com/UserProjekt/DaVinci_Script_Proxy_generator/assets/78477492/4abd475c-1fa2-42a0-baf9-8ebd42a5e136">
