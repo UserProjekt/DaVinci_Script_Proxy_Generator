@@ -9,7 +9,7 @@ However, the high data rate and larger file sizes of these formats can make the 
 This is why a proxy workflow is often used. The editor can work with lower-resolution proxy files that are easier and faster to handle during the editing process, while the high-resolution original footage is used for the final render.
   
 ## Prerequisites and Usage
-Excerpted from the Blackmagic “Design/DaVinci Resolve/Developer/Scripting/README.txt”
+Excerpted from the "Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt”
 
 
 ### Prerequisites
