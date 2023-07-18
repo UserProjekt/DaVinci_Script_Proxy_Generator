@@ -84,16 +84,4 @@ ProjectManager.SaveProject()
 
 
 #start rendering
-#Project.StartRendering()
-
-
-
-
-
-
-
-
-
-
-
-
+Project.StartRendering()
