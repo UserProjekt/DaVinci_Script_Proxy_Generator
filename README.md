@@ -44,6 +44,8 @@ You may need to set the these environment variables to allow for your Python ins
     PYTHONPATH="$PYTHONPATH:$RESOLVE_SCRIPT_API/Modules/"
     (Note: For standard ISO Linux installations, the path above may need to be modified to refer to /home/resolve instead of /opt/resolve)
 
+##_***This script cannot yet be run using the following method***_##
+
 As with Fusion scripts, Resolve scripts can also be invoked via the menu and the Console.
 
 On startup, DaVinci Resolve scans the subfolders in the directories shown below and enumerates the scripts found in the Workspace application menu under Scripts. 
@@ -63,6 +65,7 @@ Placing your script here and invoking it from the menu is the easiest way to use
 The interactive Console window allows for an easy way to execute simple scripting commands, to query or modify properties, and to test scripts. The console accepts commands in Python 2.7, Python 3.6
 and Lua and evaluates and executes them immediately. For more information on how to use the Console, please refer to the DaVinci Resolve User Manual.
 
+### Folder Structure 
 Common Footage folder structure like this
 - 📁 Production
   - 📁 Footage
@@ -85,7 +88,7 @@ In our Adobe PremierePro-based workflow，We place the Proxy folder alongside th
 
 
 
-
+## Invocation
 Upon invocation of this script, the terminal prompts the user to provide the paths for the footage folder and the proxy folder.
 <img width="682" alt="Screenshot 2023-07-18 at 22 15 33" src="https://github.com/UserProjekt/DaVinciScript-ProxyTranscoder/assets/78477492/14de004d-6fe1-4ad0-910d-56007d9cc395">
 
