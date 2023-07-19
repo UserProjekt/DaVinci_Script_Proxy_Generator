@@ -62,6 +62,8 @@ for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList
 		Aspect = intH / intW
 		Proxy_Width = "1920"
 		intProxy_Height = round(int(Proxy_Width)*Aspect)
+		if intProxy_Height % 2 == 1:
+			intProxy_Height += 1
 		Proxy_Height = str(intProxy_Height)
 		Timeline.SetSetting("useCustomSettings", "1")
 		Timeline.SetSetting("timelineResolutionWidth", Proxy_Width)
