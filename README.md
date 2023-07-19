@@ -1,4 +1,4 @@
-# DaVinci_Script_Proxy_generator
+# DaVinci_Script_Proxy_Generator
 
 This script, written in Python for DaVinci Resolve, automates the process of importing video footage and generating proxies. It categorizes the footage based on the video aspect ratio, then transcodes it to an approximate resolution of 1920x1080 using a custom DaVinci Resolve render preset titled 'FHD_h.265_420_8bit_5Mbps'. 
 
