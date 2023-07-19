@@ -23,7 +23,7 @@ DateFolderlist = RootFolder.GetSubFolderList()
 FootageFolderPath = input('"Footage"Dir:')
 ProxyFolderPath = input('"Proxy"Dir:')
 DateFolderPathList = MediaStorage.GetSubFolderList(FootageFolderPath)
-DateFolderNameList = [DateFolderPath.split('/')[-1] for DateFolderPath in DateFolderPathList]
+DateFolderNameList = [DateFolderPath.split(os.path.sep)[-1] for DateFolderPath in DateFolderPathList]
 for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList):
 	DateFolder = MediaPool.AddSubFolder(RootFolder, DateFolderName)
 	ResolutionFolderlist = DateFolder.GetSubFolderList()
