@@ -4,9 +4,10 @@ This script, written in Python for DaVinci Resolve, automates the process of imp
 
 This preset corresponds to Full High Definition (FHD) video with H.265 encoding, 4:2:0 chroma subsampling, 8-bit color depth, and a video bitrate of 5Mbps. These settings are optimized for hardware decoding and systems with low I/O performance. Reduced file size is also better for transfer and storage.
 
-You can use your custom setting in the custom preset 'FHD_h.265_420_8bit_5Mbps',or make you own preset corresponds to the 72th line of Proxy_generator.py
+Ensure you have a preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 72:
 
-		Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
+	
+  		Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
   
 ## Prerequisites and Usage
 Excerpted from the:
