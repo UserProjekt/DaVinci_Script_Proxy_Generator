@@ -53,7 +53,7 @@ You may need to set the these environment variables to allow for your Python ins
 
 
 
-### Folder Structure
+## Folder Structure
 The standard footage folder structure is outlined below. Please ensure that the date-specific folders (e.g., 'Shooting Day 1', 'Shooting Day 2') are situated directly beneath the 'Footage' folder.
 - 📁 Production
   - 📁 Footage
@@ -75,7 +75,7 @@ In our workflow,We place the Proxy folder alongside the Footage folder,feel free
       - 📁 A002_0210Z9
 
 
-### Example
+## Example
 Please ensure that no project titled 'Proxy' exists within the DaVinci Resolve Project Manager.
 
 Upon invocation of this script, the terminal prompts the user to provide the paths for the footage folder and the proxy folder.
