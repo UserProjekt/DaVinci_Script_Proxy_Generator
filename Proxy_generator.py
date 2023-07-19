@@ -68,7 +68,7 @@ for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList
 		Timeline.SetSetting("useCustomSettings", "1")
 		Timeline.SetSetting("timelineResolutionWidth", Proxy_Width)
 		Timeline.SetSetting("timelineResolutionHeight", Proxy_Height)
-		#chose DaVinci Resolve render preset
+		#choose DaVinci Resolve render preset
 		Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
 		TargetDir = os.path.join(ProxyFolderPath, DateFolderName)
 		Project.SetRenderSettings({
