@@ -71,7 +71,7 @@ for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList
 		TargetDir = os.path.join(ProxyFolderPath, DateFolderName)
 		Project.SetRenderSettings({
 		"SelectAllFrames": True,
-		"TargetDir":"/Users/hz/Desktop",
+		"TargetDir":"str(ProxyFolderPath)",
 		"FormatWidth":int(Proxy_Width),
 		"FormatHeight":int(Proxy_Height),
 		"TargetDir":TargetDir
