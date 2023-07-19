@@ -6,11 +6,11 @@ This preset corresponds to Full High Definition (FHD) video with H.265 encoding,
   
 ## Prerequisites and Usage
 Excerpted from the:
-`Mac OS X:
+Mac OS X:
  /Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt
 
- Windows:
- C:\Program Files\Blackmagic Design\DaVinci Resolve\Support\Developer\Scripting\README.txt`
+Windows:
+ C:\Program Files\Blackmagic Design\DaVinci Resolve\Support\Developer\Scripting\README.txt
 
     
 
