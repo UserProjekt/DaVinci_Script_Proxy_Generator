@@ -5,7 +5,13 @@ This script, written in Python for DaVinci Resolve, automates the process of imp
 This preset corresponds to Full High Definition (FHD) video with H.265 encoding, 4:2:0 chroma subsampling, 8-bit color depth, and a bitrate of 5Mbps. These settings are optimized for hardware decoding and systems with low I/O performance, resulting in decreased storage space.
   
 ## Prerequisites and Usage
-Excerpted from the "Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt”
+Excerpted from the:
+`Mac OS X:
+ /Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt
+ Windows:
+ C:\Program Files\Blackmagic Design\DaVinci Resolve\Support\Developer\Scripting\README.txt`
+
+    
 
 
 ### Prerequisites
