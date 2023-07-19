@@ -59,7 +59,7 @@ The standard footage folder structure is outlined below. Please ensure alignment
       - 📁 A002_0210Z9
 
   
-In our Adobe PremierePro-based workflow,We place the Proxy folder alongside the Footage folder,feel free to put it wherever you like
+In our workflow,We place the Proxy folder alongside the Footage folder,feel free to put it wherever you like
 - 📁 Production
   - 📁 Proxy
   - 📁 Footage
