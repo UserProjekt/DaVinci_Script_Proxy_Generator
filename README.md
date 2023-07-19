@@ -49,7 +49,7 @@ You may need to set the these environment variables to allow for your Python ins
 
 
 ### Folder Structure
-Common Footage folder structure like this
+The standard footage folder structure is outlined below. Please ensure alignment with this structure.
 - 📁 Production
   - 📁 Footage
     - 📁 Shooting Day 1
