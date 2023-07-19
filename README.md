@@ -10,7 +10,7 @@ Ensure you have a preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you ca
   		Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
   
 ## Prerequisites and Usage
-Excerpted from the:
+Excerpted from:
 
 Mac OS X:
  /Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt
