@@ -85,6 +85,6 @@ Upon invocation of this script, the terminal prompts the user to provide the pat
 After the paths are inputted, DaVinci Resolve initiates the process of importing video files, categorizing Clips and creating timelines based on aspect ratios. Subsequently, the script re-establishes the date-based folder structure within the Proxy folder, This then serves as the target location for the ensuing transcoding.
 <img width="1556" alt="Screenshot 2023-07-18 at 23 16 58" src="https://github.com/UserProjekt/DaVinci_Script_Proxy_generator/assets/78477492/fcf8034d-01ec-423a-8b07-626cc620eb6c">
 
-If DaVinci Resolve crash during the rendering process, you can resume the unfinished jobs by reopening the 'Proxy' Project and restart the rendering. Because the script makes sure to save the project before it starts the automatic rendering.
+If DaVinci Resolve crashes during the rendering process, you can resume the unfinished jobs by reopening the 'Proxy' Project and restarting the rendering. Because the script makes sure to save the project before it starts the automatic rendering.
 
 You can disable automatic rendering by commenting out the last line of Proxy_generator.py.
