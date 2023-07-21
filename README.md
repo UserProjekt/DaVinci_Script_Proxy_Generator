@@ -12,7 +12,7 @@ Ensure you have a preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you ca
 ## Prerequisites and Usage
 Excerpted from:
 
-Mac OS X:
+Mac OS:
  /Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt
 
 Windows:
