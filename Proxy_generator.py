@@ -26,7 +26,6 @@ DateFolderPathList = MediaStorage.GetSubFolderList(FootageFolderPath)
 DateFolderNameList = [DateFolderPath.split(os.path.sep)[-1] for DateFolderPath in DateFolderPathList]
 for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList):
 	DateFolder = MediaPool.AddSubFolder(RootFolder, DateFolderName)
-	ResolutionFolderlist = DateFolder.GetSubFolderList()
 	Uncat_Clips = MediaStorage.AddItemListToMediaPool(DateFolderPath)
 	#create folder base on resolution
 	for Uncat_Clip in Uncat_Clips:
@@ -41,6 +40,7 @@ for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList
 				Uncat_Cliplist = [Uncat_Clip]
 				MediaPool.MoveClips(Uncat_Cliplist, ResolutionFolder)
 				MediaPool.SetCurrentFolder(DateFolder) 
+				ResolutionFolderlist = DateFolder.GetSubFolderList()
 			else:
 				#To obtain the existing folder object
 				ResolutionFolder = [ResolutionFolder_exist for ResolutionFolder_exist in ResolutionFolderlist if ResolutionFolder_exist.GetName() == Resolution][0]
@@ -48,6 +48,7 @@ for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList
 				Uncat_Cliplist = [Uncat_Clip]
 				MediaPool.MoveClips(Uncat_Cliplist, ResolutionFolder)
 				MediaPool.SetCurrentFolder(DateFolder)
+				ResolutionFolderlist = DateFolder.GetSubFolderList()
 
 	#create timelines base on resolution folder
 	for ResolutionFolder in ResolutionFolderlist:
