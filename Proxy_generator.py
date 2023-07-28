@@ -20,8 +20,20 @@ RootFolder = MediaPool.GetRootFolder()
 DateFolderlist = RootFolder.GetSubFolderList()
 
 #create folder base on date import videofiles
-FootageFolderPath = input('"Footage"Dir:')
-ProxyFolderPath = input('"Proxy"Dir:')
+while True:
+    FootageFolderPath = input('Footage Folder Path:')
+    if FootageFolderPath.strip():
+        break
+    else:
+        print("Please enter Footage Folder Path...")
+
+while True:
+    ProxyFolderPath = input('Proxy Folder Path:')
+    if ProxyFolderPath.strip():
+        break
+    else:
+        print("Please enter Proxy Folder Path...")
+
 DateFolderPathList = MediaStorage.GetSubFolderList(FootageFolderPath)
 DateFolderNameList = [DateFolderPath.split(os.path.sep)[-1] for DateFolderPath in DateFolderPathList]
 for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList):
