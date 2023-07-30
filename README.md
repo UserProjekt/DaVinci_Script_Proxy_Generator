@@ -74,8 +74,9 @@ In our workflow,We place the Proxy folder alongside the Footage folder,feel free
     - 📁 Shooting Day 2
       - 📁 A002_0210Z9
 
-**Please ensure that no project titled 'Proxy' exists within the DaVinci Resolve Project Manager.**
+
 ## Example
+**Please ensure that no project titled 'Proxy' exists within the DaVinci Resolve Project Manager.**
 Upon running of this script, the terminal prompts the user to provide the paths for the footage folder and the proxy folder.
  <img width="682" alt="Screenshot 2023-07-18 at 22 15 33" src="https://github.com/UserProjekt/DaVinci_Script_Proxy_generator/assets/78477492/4abd475c-1fa2-42a0-baf9-8ebd42a5e136">
 
