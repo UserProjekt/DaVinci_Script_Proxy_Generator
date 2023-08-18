@@ -16,7 +16,7 @@ Mac OS:
  /Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt
 
 Windows:
- C:\Program Files\Blackmagic Design\DaVinci Resolve\Support\Developer\Scripting\README.txt
+ C:\ProgramData\Blackmagic Design\DaVinci Resolve\Support\Developer\Scripting\README.txt
 
     
 
