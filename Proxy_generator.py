@@ -19,9 +19,19 @@ MediaPool = Project.GetMediaPool()
 RootFolder = MediaPool.GetRootFolder()
 DateFolderlist = RootFolder.GetSubFolderList()
 
-#create folder base on date import videofiles
+def clean_path_input(path):
+    # Replace escaped spaces
+    path = path.replace("\\ ", " ")
+    # Replace escaped hash symbols
+    path = path.replace("\\#", "#")
+    # Remove quotes around the path (if any)
+    path = path.strip('" ').strip()
+    return path
+
 while True:
     FootageFolderPath = input('Footage Folder Path:')
+    # Correcting the path input for any escaped spaces
+    FootageFolderPath = clean_path_input(FootageFolderPath)
     if FootageFolderPath.strip():
         break
     else:
@@ -29,11 +39,14 @@ while True:
 
 while True:
     ProxyFolderPath = input('Proxy Folder Path:')
+    # Correcting the path input for any escaped spaces
+    ProxyFolderPath = clean_path_input(ProxyFolderPath)
     if ProxyFolderPath.strip():
         break
     else:
         print("Please enter Proxy Folder Path...")
-
+	    
+#create folder base on date import videofiles
 DateFolderPathList = MediaStorage.GetSubFolderList(FootageFolderPath)
 DateFolderNameList = [DateFolderPath.split(os.path.sep)[-1] for DateFolderPath in DateFolderPathList]
 for DateFolderName, DateFolderPath in zip(DateFolderNameList, DateFolderPathList):
