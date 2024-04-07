@@ -62,7 +62,7 @@ You may need to set the these environment variables to allow for your Python ins
       - 📁 A002_0210Z9
 
   
-In our workflow,We place the Proxy folder alongside the Footage folder,feel free to put it wherever you like
+In our workflow,We place the Proxy folder alongside the Footage folder, feel free to put it wherever you like
 - 📁 Production
   - 📁 Proxy
   - 📁 Footage
