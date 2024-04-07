@@ -10,7 +10,7 @@ Ensure you have a preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you ca
   		Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
     
 ## Prerequisites
-The Python version requirements for DaVinci Resolve depend on the version of the software you are using. This is because older versions of DaVinci Resolve rely on the `imp` module for importing Python modules, which is deprecated in Python 3.12. To address this, starting from version 18.6.5, DaVinci Resolve has switched to using the `importlib` module instead.
+The Python version requirements for DaVinci Resolve depend on the version of the software you are using. This is because older versions of DaVinci Resolve rely on the `imp` module for importing Python modules, which is [removed](https://docs.python.org/3.11/library/imp.html) in Python 3.12. To address this, starting from version 18.6.5, DaVinci Resolve has switched to using the `importlib` module instead.
 
 Here are the specific Python version requirements based on your DaVinci Resolve version:
 
