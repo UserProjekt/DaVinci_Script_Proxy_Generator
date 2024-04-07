@@ -8,28 +8,26 @@ Ensure you have a preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you ca
 
 	
   		Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
-  
-## Prerequisites and Usage
-Excerpted from:
-
-Mac OS:
- /Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/README.txt
-
-Windows:
- C:\ProgramData\Blackmagic Design\DaVinci Resolve\Support\Developer\Scripting\README.txt
-
     
+## Prerequisites
+The Python version requirements for DaVinci Resolve depend on the version of the software you are using. This is because older versions of DaVinci Resolve rely on the `imp` module for importing Python modules, which is deprecated in Python 3.12. To address this, starting from version 18.6.5, DaVinci Resolve has switched to using the `importlib` module instead.
+
+Here are the specific Python version requirements based on your DaVinci Resolve version:
+
+1. If your DaVinci Resolve version is 18.6.5 or higher:
+   - Your Python version should be greater than or equal to 3.6 (Python >= 3.6).
+
+2. If you are using an older version of DaVinci Resolve (lower than 18.6.5):
+   - Your Python version should be between 3.6 and 3.11, inclusive (3.6 <= Python <= 3.11).
+   - Older versions of DaVinci Resolve are not compatible with Python versions higher than 3.11 due to the deprecation of the `imp` module.
+
+To summarize:
+
+	- For DaVinci Resolve version 18.6.5 and above: Python >= 3.6
+	- For DaVinci Resolve versions below 18.6.5: 3.6 <= Python <= 3.11
 
 
-### Prerequisites
-DaVinci Resolve scripting requires one of the following to be installed (for all users):
-
-    Lua 5.1
-    Python 2.7 64-bit
-    Python >= 3.6 64-bit
-
-
-### Using a script
+## Using a script
 DaVinci Resolve needs to be running for a script to be invoked.
 
 For a Resolve script to be executed from an external folder, the script needs to know of the API location. 
