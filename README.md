@@ -49,7 +49,7 @@ You may need to set the these environment variables to allow for your Python ins
     PYTHONPATH="$PYTHONPATH:$RESOLVE_SCRIPT_API/Modules/"
     (Note: For standard ISO Linux installations, the path above may need to be modified to refer to /home/resolve instead of /opt/resolve)
 
-For DaVinci Resolve installed through the Apple App Store:
+For DaVinci Resolve installed via the Apple App Store:
 
 	Mac OS：
 	RESOLVE_SCRIPT_API="/Applications/DaVinci Resolve Studio.app/Contents/Resources/Developer/Scripting"
