@@ -51,7 +51,6 @@ You may need to set the these environment variables to allow for your Python ins
 
 For DaVinci Resolve installed via the Apple App Store:
 
-	Mac OS：
 	RESOLVE_SCRIPT_API="/Applications/DaVinci Resolve Studio.app/Contents/Resources/Developer/Scripting"
 	RESOLVE_SCRIPT_LIB="/Applications/DaVinci Resolve Studio.app/Contents/Libraries/Fusion/fusionscript.so"
 	PYTHONPATH="$PYTHONPATH:$RESOLVE_SCRIPT_API/Modules/"
