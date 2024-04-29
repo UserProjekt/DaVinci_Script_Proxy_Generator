@@ -49,7 +49,12 @@ You may need to set the these environment variables to allow for your Python ins
     PYTHONPATH="$PYTHONPATH:$RESOLVE_SCRIPT_API/Modules/"
     (Note: For standard ISO Linux installations, the path above may need to be modified to refer to /home/resolve instead of /opt/resolve)
 
+For DaVinci Resolve installed through the Apple App Store:
 
+	Mac OS：
+	RESOLVE_SCRIPT_API="/Applications/DaVinci Resolve Studio.app/Contents/Resources/Developer/Scripting"
+	RESOLVE_SCRIPT_LIB="/Applications/DaVinci Resolve Studio.app/Contents/Libraries/Fusion/fusionscript.so"
+	PYTHONPATH="$PYTHONPATH:$RESOLVE_SCRIPT_API/Modules/"
 
 ## Folder Structure
 **The industray standard footage folder structure is outlined below. Please ensure that the date-specific folders (e.g., 'Shooting Day 1', 'Shooting Day 2') are situated directly beneath the 'Footage' folder.**
