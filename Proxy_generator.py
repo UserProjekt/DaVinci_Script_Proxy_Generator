@@ -188,6 +188,8 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
     MediaPool = Project.GetMediaPool()
     RootFolder = MediaPool.GetRootFolder()
     
+    Project.LoadBurnInPreset("burn-in.xml")
+
     # Process each selected footage folder
     for footage_folder_path in selected_footage_folders:
         footage_folder_name = os.path.basename(footage_folder_path)
