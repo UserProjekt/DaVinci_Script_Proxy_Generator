@@ -10,7 +10,6 @@ Ensure you have a render preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively,
       Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
       
 
-
 The script automatically applies source clip name and source timecode overlay burn-ins to the generated proxies by default. This feature uses a custom data burn-in preset titled 'Burn-in' and can be disabled manually if needed.
 
 Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 191:
@@ -51,6 +50,7 @@ For DaVinci Resolve installed via the Apple App Store:
     RESOLVE_SCRIPT_API="/Applications/DaVinci Resolve Studio.app/Contents/Resources/Developer/Scripting"
     RESOLVE_SCRIPT_LIB="/Applications/DaVinci Resolve Studio.app/Contents/Libraries/Fusion/fusionscript.so"
     PYTHONPATH="$PYTHONPATH:$RESOLVE_SCRIPT_API/Modules/"
+
 
 ## Folder Structure
 **The industray standard footage folder structure is outlined below. Please ensure that the date-specific folders (e.g., 'Shooting Day 1', 'Shooting Day 2') are situated directly beneath the 'Footage' folder.**
@@ -129,6 +129,7 @@ If DaVinci Resolve crashes during rendering, you can resume unfinished jobs by:
 2. Restarting the rendering process
 
 The script automatically saves the project before starting the rendering process, ensuring your progress is preserved.
+
 
 ## Update
 
