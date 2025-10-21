@@ -21,6 +21,7 @@ Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can cr
 
 ## Prerequisites
 Python >= 3.6 64-bit
+
 DaVinci Resolve >= 18.6.5
 
 
