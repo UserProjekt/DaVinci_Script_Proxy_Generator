@@ -20,7 +20,7 @@ Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can cr
     
 
 ## Prerequisites
-Python >= 3.6 64-bit
+Python >= 3.6 64-bit  
 DaVinci Resolve >= 18.6.5
 
 
@@ -48,9 +48,9 @@ You may need to set the these environment variables to allow for your Python ins
 
 For DaVinci Resolve installed via the Apple App Store:
 
-  RESOLVE_SCRIPT_API="/Applications/DaVinci Resolve Studio.app/Contents/Resources/Developer/Scripting"
-  RESOLVE_SCRIPT_LIB="/Applications/DaVinci Resolve Studio.app/Contents/Libraries/Fusion/fusionscript.so"
-  PYTHONPATH="$PYTHONPATH:$RESOLVE_SCRIPT_API/Modules/"
+    RESOLVE_SCRIPT_API="/Applications/DaVinci Resolve Studio.app/Contents/Resources/Developer/Scripting"
+    RESOLVE_SCRIPT_LIB="/Applications/DaVinci Resolve Studio.app/Contents/Libraries/Fusion/fusionscript.so"
+    PYTHONPATH="$PYTHONPATH:$RESOLVE_SCRIPT_API/Modules/"
 
 ## Folder Structure
 **The industray standard footage folder structure is outlined below. Please ensure that the date-specific folders (e.g., 'Shooting Day 1', 'Shooting Day 2') are situated directly beneath the 'Footage' folder.**
@@ -119,12 +119,12 @@ Examples:
 If DaVinci Resolve crashes during the rendering process, you can resume the unfinished jobs by reopening the 'Proxy' Project and restarting the rendering. Because the script makes sure to save the project before it starts the automatic rendering.
 
 ## Update
-New in v1.1.0:
+New in v1.1.0:  
     Json input support
 
-New in v1.2.0:
-  Burn-in preset support
+New in v1.2.0:  
+    Burn-in preset support
 
-New in v1.2.1:
-  Correct resolution handling for DCI 4K & 2K footage
+New in v1.2.1:  
+    Correct resolution handling for DCI 4K & 2K footage
 
