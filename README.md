@@ -93,31 +93,31 @@ The script automatically creates organized bin structures in DaVinci Resolve tha
 - `-j JSON, --json JSON` - Path to JSON file from file_compare (JSON mode)
 - `-f FOOTAGE, --footage FOOTAGE` - Footage folder path (Direct mode)
 - `-p PROXY, --proxy PROXY` - Proxy folder path
-- `-l LEVEL, --level LEVEL` - Number of subfolder levels to recreate (default: 1)
+- `-l LEVEL, --level LEVEL` - Subfolder levels to recreate (default: 1)
 - `-d {1,2}, --dataset {1,2}` - Select dataset for JSON mode:1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)
 
 **Direct Mode (using positional arguments):**
 ```bash
-proxy_generator.py /path/to/footage /path/to/proxy          # Default level=1
-proxy_generator.py /path/to/footage /path/to/proxy 1        # Explicit level=1
-proxy_generator.py /path/to/footage /path/to/proxy 2        # Level=2
+proxy_generator.py /path/to/footage /path/to/proxy          # Direct mode, level=1 (default)
+proxy_generator.py /path/to/footage /path/to/proxy 1        # Direct mode, level=1
+proxy_generator.py /path/to/footage /path/to/proxy 2        # Direct mode, level=2
 ```
 
 **Direct Mode (using flags):**
 ```bash
-proxy_generator.py -f /path/to/footage -p /path/to/proxy -l 2
+proxy_generator.py -f /path/to/footage -p /path/to/proxy -l 2 # Direct mode, level=2
 ```
 
 **JSON Mode (using positional arguments):**
 ```bash
-proxy_generator.py comparison.json 1 /path/to/proxy         # Dataset=1, level chosen interactively
-proxy_generator.py comparison.json 1 /path/to/proxy 1       # Dataset=1, level=1
-proxy_generator.py comparison.json 2 /path/to/proxy 2       # Dataset=2, level=2
+proxy_generator.py comparison.json 1 /path/to/proxy         # JSON mode, dataset=1, level=1
+proxy_generator.py comparison.json 1 /path/to/proxy 1       # JSON mode, dataset=1, level=1
+proxy_generator.py comparison.json 2 /path/to/proxy 2       # JSON mode, dataset=2, level=2
 ```
 
 **JSON Mode (using flags):**
 ```bash
-proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -l 2
+proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -l 2 # JSON mode, dataset=1, level=2
 ```
 
 ### Recovery from Crashes
