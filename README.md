@@ -74,49 +74,61 @@ In our workflow,We place the Proxy folder alongside the Footage folder, feel fre
       - 📁 A002_0210Z9
 
 
-## Example
-**Please ensure that no project titled 'Proxy' exists within the DaVinci Resolve Project Manager.**
+## Examples
 
-This script supports two modes:
-1. Direct Mode: Generate proxies for footage folders with automatic bin organization
-2. JSON Mode: Re-generate missing proxies based on file comparison results
+**Important:** Ensure no project named 'Proxy' exists in the DaVinci Resolve Project Manager before running the script.
 
-The script creates organized bin structures in DaVinci Resolve based on your folder hierarchy,
-imports footage, and sets up proxy paths automatically. It preserves your folder structure
-up to the specified subfolder level.
+The script supports two modes:
 
-positional arguments:
-  args                  Positional arguments for default mode
+1. **Direct Mode:** Generate proxies directly from footage folders with automatic bin organization
+2. **JSON Mode:** Re-generate missing proxies based on file comparison results from a JSON file
 
-options:
-  -h, --help            show this help message and exit
-  -j JSON, --json JSON  Path to JSON file from file_compare (JSON mode)
-  -f FOOTAGE, --footage FOOTAGE
-                        Footage folder path (Direct mode)
-  -p PROXY, --proxy PROXY
-                        Proxy folder path
-  -l LEVEL, --level LEVEL
-                        Subfolder levels to recreate
-  -d {1,2}, --dataset {1,2}
-                        Select dataset: 1 for files_only_in_group1, 2 for
-                        files_only_in_group2 (JSON mode only)
+The script automatically creates organized bin structures in DaVinci Resolve that mirror your folder hierarchy, imports footage, and configures proxy paths. Your folder structure is preserved up to the specified subfolder level.
 
-Examples:
-  Default mode (positional arguments):
-    proxy_generator.py /path/to/footage /path/to/proxy                   # Direct mode, level=1 (default)
-    proxy_generator.py /path/to/footage /path/to/proxy 1                 # Direct mode, level=1
-    proxy_generator.py /path/to/footage /path/to/proxy 2                 # Direct mode, level=2
-    proxy_generator.py comparison.json 1 /path/to/proxy                  # JSON mode, dataset=1, level chosen interactively
-    proxy_generator.py comparison.json 1 /path/to/proxy 1                # JSON mode, dataset=1, level=1
-    proxy_generator.py comparison.json 2 /path/to/proxy 2                # JSON mode, dataset=2, level=2
+**Positional arguments:**
+- `args` - Positional arguments for default mode
 
-  Direct mode with flags:
-    proxy_generator.py -f /path/to/footage -p /path/to/proxy -l 2        # Direct mode, level=2
+**Optional arguments:**
+- `-h, --help` - Show help message and exit
+- `-j JSON, --json JSON` - Path to JSON file from file_compare (JSON mode)
+- `-f FOOTAGE, --footage FOOTAGE` - Footage folder path (Direct mode)
+- `-p PROXY, --proxy PROXY` - Proxy folder path
+- `-l LEVEL, --level LEVEL` - Number of subfolder levels to recreate (default: 1)
+- `-d {1,2}, --dataset {1,2}` - Select dataset for JSON mode:
+  - 1: files_only_in_group1
+  - 2: files_only_in_group2
 
-  JSON mode with flags:
-    proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -l 2    # JSON mode, dataset=1, level=2
+**Direct Mode (using positional arguments):**
+```bash
+proxy_generator.py /path/to/footage /path/to/proxy          # Default level=1
+proxy_generator.py /path/to/footage /path/to/proxy 1        # Explicit level=1
+proxy_generator.py /path/to/footage /path/to/proxy 2        # Level=2
+```
 
-If DaVinci Resolve crashes during the rendering process, you can resume the unfinished jobs by reopening the 'Proxy' Project and restarting the rendering. Because the script makes sure to save the project before it starts the automatic rendering.
+**Direct Mode (using flags):**
+```bash
+proxy_generator.py -f /path/to/footage -p /path/to/proxy -l 2
+```
+
+**JSON Mode (using positional arguments):**
+```bash
+proxy_generator.py comparison.json 1 /path/to/proxy         # Dataset=1, level chosen interactively
+proxy_generator.py comparison.json 1 /path/to/proxy 1       # Dataset=1, level=1
+proxy_generator.py comparison.json 2 /path/to/proxy 2       # Dataset=2, level=2
+```
+
+**JSON Mode (using flags):**
+```bash
+proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -l 2
+```
+
+### Recovery from Crashes
+
+If DaVinci Resolve crashes during rendering, you can resume unfinished jobs by:
+1. Reopening the 'Proxy' project in DaVinci Resolve
+2. Restarting the rendering process
+
+The script automatically saves the project before starting the rendering process, ensuring your progress is preserved.
 
 ## Update
 
