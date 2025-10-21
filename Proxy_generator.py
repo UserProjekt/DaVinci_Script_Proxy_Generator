@@ -188,7 +188,7 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
     MediaPool = Project.GetMediaPool()
     RootFolder = MediaPool.GetRootFolder()
     
-    Project.LoadBurnInPreset("burn-in.xml")
+    Project.LoadBurnInPreset("burn-in")
 
     # Process each selected footage folder
     for footage_folder_path in selected_footage_folders:
@@ -275,12 +275,12 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
                     width, height = resolution_folder_name.split("x")
                     int_w = int(width)
                     int_h = int(height)
-                    aspect = int_h / int_w
-                    proxy_width = "1920"
-                    int_proxy_height = round(int(proxy_width) * aspect)
-                    if int_proxy_height % 2 == 1:
-                        int_proxy_height += 1
-                    proxy_height = str(int_proxy_height)
+                    aspect = int_w / int_h
+                    proxy_height = "1080"
+                    int_proxy_width = round(int(proxy_height) * aspect)
+                    if int_proxy_width % 2 == 1:
+                        int_proxy_width += 1
+                    proxy_width = str(int_proxy_width)
                     
                     timeline.SetSetting("useCustomSettings", "1")
                     timeline.SetSetting("timelineResolutionWidth", proxy_width)
