@@ -119,7 +119,13 @@ Examples:
 If DaVinci Resolve crashes during the rendering process, you can resume the unfinished jobs by reopening the 'Proxy' Project and restarting the rendering. Because the script makes sure to save the project before it starts the automatic rendering.
 
 ## Update
-- **New in v1.1.0:** JSON input support
-- **New in v1.2.0:** Burn-in preset support  
-- **New in v1.2.1:** Correct resolution handling for DCI 4K & 2K footage
+
+### New in v1.1.0:
+- JSON input support
+
+### New in v1.2.0:
+- Burn-in preset support
+
+### New in v1.2.1:
+- Correct resolution handling for DCI 4K & 2K footage
 
