@@ -122,11 +122,7 @@ proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -l 2 # JSON mode, d
 
 ### Recovery from Crashes
 
-If DaVinci Resolve crashes during rendering, you can resume unfinished jobs by:
-1. Reopening the 'Proxy' project in DaVinci Resolve
-2. Restarting the rendering process
-
-The script automatically saves the project before starting the rendering process, ensuring your progress is preserved.
+If DaVinci Resolve crashes during rendering, simply reopen the 'Proxy' project and restart rendering. The script automatically saves the project before rendering, so your progress is preserved.
 
 
 ## Update
