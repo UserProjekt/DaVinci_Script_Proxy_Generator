@@ -94,9 +94,7 @@ The script automatically creates organized bin structures in DaVinci Resolve tha
 - `-f FOOTAGE, --footage FOOTAGE` - Footage folder path (Direct mode)
 - `-p PROXY, --proxy PROXY` - Proxy folder path
 - `-l LEVEL, --level LEVEL` - Number of subfolder levels to recreate (default: 1)
-- `-d {1,2}, --dataset {1,2}` - Select dataset for JSON mode:
-  - 1: files_only_in_group1
-  - 2: files_only_in_group2
+- `-d {1,2}, --dataset {1,2}` - Select dataset for JSON mode:1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)
 
 **Direct Mode (using positional arguments):**
 ```bash

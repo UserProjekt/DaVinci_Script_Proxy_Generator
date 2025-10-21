@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+DaVinci Script Proxy Generator
+Automates proxy generation for DaVinci Resolve
+"""
+
+__version__ = "1.2.1"
+__author__ = 'userprojekt'
+
 
 import DaVinciResolveScript as dvr_script
 resolve = dvr_script.scriptapp("Resolve")
