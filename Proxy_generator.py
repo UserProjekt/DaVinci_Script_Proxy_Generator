@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 __author__ = 'userprojekt'
 
 
@@ -186,11 +186,11 @@ def select_footage_folders(organized_files):
         print("Invalid selection. Please try again.")
         return select_footage_folders(organized_files)
 
-def process_files_in_resolve(organized_files, selected_footage_folders, proxy_folder_path, subfolder_depth, is_direct_mode=False, clean_image=False):
+def process_files_in_resolve(organized_files, selected_footage_folders, proxy_folder_path, subfolder_depth, is_directory_mode=False, clean_image=False):
     """Process files in DaVinci Resolve"""
     # Create project with appropriate name based on mode
     ProjectManager = resolve.GetProjectManager()
-    project_name = "proxy" if is_direct_mode else "proxy_redo"
+    project_name = "proxy" if is_directory_mode else "proxy_redo"
     Project = ProjectManager.CreateProject(project_name)
     MediaStorage = resolve.GetMediaStorage()
     MediaPool = Project.GetMediaPool()
@@ -391,15 +391,15 @@ def process_json_mode(json_path, proxy_path, dataset, level=None, clean_image=Fa
         sys.exit(1)
     
     # Process in Resolve
-    process_files_in_resolve(organized_files, selected_footage_folders, proxy_path, subfolder_depth, is_direct_mode=False, clean_image=clean_image)
+    process_files_in_resolve(organized_files, selected_footage_folders, proxy_path, subfolder_depth, is_directory_mode=False, clean_image=clean_image)
 
-def process_direct_mode(footage_path, proxy_path, level, clean_image=False):
+def process_directory_mode(footage_path, proxy_path, level, clean_image=False):
     """Process footage folder directly without JSON"""
     if not os.path.exists(footage_path):
         print(f"Error: Footage folder does not exist: {footage_path}")
         sys.exit(1)
     
-    print(f"\nDirect mode:")
+    print(f"\nDirectory mode:")
     print(f"Footage folder: {footage_path}")
     print(f"Proxy folder: {proxy_path}")
     print(f"Subfolder levels: {level}")
@@ -444,7 +444,7 @@ def process_direct_mode(footage_path, proxy_path, level, clean_image=False):
         print(f"  Group '{key}': {folders}")
     
     # Process all folders
-    process_files_in_resolve(organized_files, [footage_path], proxy_path, level, is_direct_mode=True, clean_image=clean_image)
+    process_files_in_resolve(organized_files, [footage_path], proxy_path, level, is_directory_mode=True, clean_image=clean_image)
 
 def is_json_file(path):
     """Check if the path is likely a JSON file"""
@@ -517,16 +517,16 @@ up to the specified subfolder level.''',
         process_json_mode(json_path, proxy_path, dataset, level, args.clean)
         
     elif args.footage:
-        # Direct mode with flags
+        # Directory mode with flags
         if not args.proxy:
-            parser.error("Direct mode requires -p/--proxy")
+            parser.error("Directory mode requires -p/--proxy")
         
         footage_path = clean_path_input(args.footage)
         proxy_path = clean_path_input(args.proxy)
         level = args.level if args.level is not None else 1  # Default to 1
         
-        # Process direct mode
-        process_direct_mode(footage_path, proxy_path, level, args.clean)
+        # Process directory mode
+        process_directory_mode(footage_path, proxy_path, level, args.clean)
         
     elif len(args.args) >= 2:
         # Default mode - need to determine if first arg is JSON or footage folder
@@ -559,7 +559,7 @@ up to the specified subfolder level.''',
             process_json_mode(json_path, proxy_path, dataset, level, False)  # Default to False for positional
             
         else:
-            # Direct mode: footage_folder proxy_folder [level]
+            # Directory mode: footage_folder proxy_folder [level]
             footage_path = first_arg
             proxy_path = clean_path_input(args.args[1])
             
@@ -571,15 +571,15 @@ up to the specified subfolder level.''',
                 except ValueError:
                     parser.error("Level must be a number")
             
-            # Process direct mode
-            process_direct_mode(footage_path, proxy_path, level, False)  # Default to False for positional
+            # Process directory mode
+            process_directory_mode(footage_path, proxy_path, level, False)  # Default to False for positional
             
     else:
         parser.error("Usage:\n"
-                    "  JSON mode:   script.py -j json_file -d dataset -p proxy_folder [-l level]\n"
-                    "  Direct mode: script.py -f footage_folder -p proxy_folder [-l level]\n"
-                    "  Default:     script.py json_file dataset proxy_folder [level]\n"
-                    "               script.py footage_folder proxy_folder [level]")
+                    "  JSON mode:      script.py -j json_file -d dataset -p proxy_folder [-l level]\n"
+                    "  Directory mode: script.py -f footage_folder -p proxy_folder [-l level]\n"
+                    "  Default:        script.py json_file dataset proxy_folder [level]\n"
+                    "                  script.py footage_folder proxy_folder [level]")
 
 if __name__ == "__main__":
     main()

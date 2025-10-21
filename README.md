@@ -80,7 +80,7 @@ In our workflow,We place the Proxy folder alongside the Footage folder, feel fre
 
 The script supports two modes:
 
-1. **Direct Mode:** Generate proxies directly from footage folders with automatic bin organization
+1. **Directory Mode:** Generate proxies directly from footage folders with automatic bin organization
 2. **JSON Mode:** Re-generate missing proxies based on file comparison results from a JSON file
 
 The script automatically creates organized bin structures in DaVinci Resolve that mirror your folder hierarchy, imports footage, and configures proxy paths. Your folder structure is preserved up to the specified subfolder level.
@@ -91,21 +91,21 @@ The script automatically creates organized bin structures in DaVinci Resolve tha
 **Optional arguments:**
 - `-h, --help` - Show help message and exit
 - `-j JSON, --json JSON` - Path to JSON file from file_compare (JSON mode)
-- `-f FOOTAGE, --footage FOOTAGE` - Footage folder path (Direct mode)
+- `-f FOOTAGE, --footage FOOTAGE` - Footage folder path (Directory mode)
 - `-p PROXY, --proxy PROXY` - Proxy folder path
 - `-l LEVEL, --level LEVEL` - Subfolder levels to recreate (default: 1)
 - `-d {1,2}, --dataset {1,2}` - Select dataset for JSON mode:1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)
 
-**Direct Mode (using positional arguments):**
+**Directory Mode (using positional arguments):**
 ```bash
-proxy_generator.py /path/to/footage /path/to/proxy          # Direct mode, level=1 (default)
-proxy_generator.py /path/to/footage /path/to/proxy 1        # Direct mode, level=1
-proxy_generator.py /path/to/footage /path/to/proxy 2        # Direct mode, level=2
+proxy_generator.py /path/to/footage /path/to/proxy          # Directory mode, level=1 (default)
+proxy_generator.py /path/to/footage /path/to/proxy 1        # Directory mode, level=1
+proxy_generator.py /path/to/footage /path/to/proxy 2        # Directory mode, level=2
 ```
 
-**Direct Mode (using flags):**
+**Directory Mode (using flags):**
 ```bash
-proxy_generator.py -f /path/to/footage -p /path/to/proxy -l 2 # Direct mode, level=2
+proxy_generator.py -f /path/to/footage -p /path/to/proxy -l 2 # Directory mode, level=2
 ```
 
 **JSON Mode (using positional arguments):**
