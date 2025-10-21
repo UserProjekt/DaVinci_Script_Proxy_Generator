@@ -136,3 +136,6 @@ If DaVinci Resolve crashes during rendering, simply reopen the 'Proxy' project a
 ### New in v1.2.1:
 - Correct resolution handling for DCI 4K & 2K footage
 
+### New in v1.2.2:
+- Renamed "Direct mode" to "Directory mode" for clarity
+
