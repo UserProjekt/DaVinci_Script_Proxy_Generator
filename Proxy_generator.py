@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 __author__ = 'userprojekt'
 
 
@@ -494,7 +494,7 @@ up to the specified subfolder level.''',
     parser.add_argument('-l', '--level', type=int, help='Subfolder levels to recreate')
     parser.add_argument('-d', '--dataset', type=int, choices=[1, 2], 
                         help='Select dataset: 1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)')
-    parser.add_argument('-c', '--clean image', action='store_true', 
+    parser.add_argument('-c', '--clean-image', action='store_true', 
                     help='Generate clean proxies without burn-in overlays')
     
     # Handle positional arguments for default mode
