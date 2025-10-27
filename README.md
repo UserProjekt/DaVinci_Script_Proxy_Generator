@@ -139,3 +139,6 @@ If DaVinci Resolve crashes during rendering, simply reopen the 'Proxy' project a
 ### New in v1.2.2:
 - Renamed "Direct mode" to "Directory mode" for clarity
 
+### New in v1.2.3:
+- Fixed --clean-image option
+
