@@ -514,7 +514,7 @@ up to the specified subfolder level.''',
         level = args.level  # Can be None
         
         # Process JSON mode
-        process_json_mode(json_path, proxy_path, dataset, level, args.clean)
+        process_json_mode(json_path, proxy_path, dataset, level, args.clean_image)
         
     elif args.footage:
         # Directory mode with flags
@@ -526,7 +526,7 @@ up to the specified subfolder level.''',
         level = args.level if args.level is not None else 1  # Default to 1
         
         # Process directory mode
-        process_directory_mode(footage_path, proxy_path, level, args.clean)
+        process_directory_mode(footage_path, proxy_path, level, args.clean_image)
         
     elif len(args.args) >= 2:
         # Default mode - need to determine if first arg is JSON or footage folder
