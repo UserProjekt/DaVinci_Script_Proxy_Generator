@@ -142,3 +142,5 @@ If DaVinci Resolve crashes during rendering, simply reopen the 'Proxy' project a
 ### New in v1.2.3:
 - Fixed --clean-image option
 
+### New in v1.2.4:
+- Bug fix: Corrected --clean-image argument handling
