@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.2.4"
+__version__ = "1.3.0"
 __author__ = 'userprojekt'
 
 
@@ -14,6 +14,7 @@ import os
 import sys
 import argparse
 import json
+from datetime import datetime
 
 def counter():
     i = 0
@@ -32,165 +33,144 @@ def clean_path_input(path):
     path = path.strip('" ').strip()
     return path
 
-def get_parent_folders_at_levels(file_paths):
-    """Extract unique parent folders at different levels from file paths"""
-    level_folders = {}  # level -> set of folders
-    max_depth = 0
+def organize_files_by_structure(file_paths, in_depth, out_depth):
+    """Organize files based on input/output depth ranges"""
+    organized_files = {}
     
     for file_path in file_paths:
-        parts = file_path.split(os.sep)
-        # Skip empty parts and the filename
-        parts = [p for p in parts[:-1] if p]  
-        max_depth = max(max_depth, len(parts))
-        
-        # Build paths at each level
-        for i in range(len(parts)):
-            level = i + 1
-            if level not in level_folders:
-                level_folders[level] = set()
-            
-            # Reconstruct path up to this level
-            if os.sep == '/':  # Unix-like
-                folder_path = '/' + os.path.join(*parts[:level])
-            else:  # Windows
-                folder_path = os.path.join(*parts[:level])
-            
-            level_folders[level].add((folder_path, parts[i]))
-    
-    return level_folders, max_depth
-
-def select_footage_folder_level(level_folders):
-    """Let user select which level represents the footage folder"""
-    print("\nSelect footage folder level:")
-    
-    # Show examples from each level
-    for level in sorted(level_folders.keys()):
-        folders = list(level_folders[level])
-        print(f"\nLevel {level}:")
-        # Show up to 3 examples
-        for i, (path, name) in enumerate(folders[:3]):
-            print(f"  Example: {name} (full path: {path})")
-        if len(folders) > 3:
-            print(f"  ... and {len(folders) - 3} more folders")
-    
-    while True:
-        try:
-            level = int(input("\nEnter Footage folder level number: "))
-            if level in level_folders:
-                return level
-            else:
-                print(f"Invalid level. Please choose from: {sorted(level_folders.keys())}")
-        except ValueError:
-            print("Please enter a valid number.")
-
-def select_subfolder_depth(footage_level, max_depth, file_paths):
-    """Let user select how many subfolder levels to recreate in Media Pool"""
-    print(f"\nYou selected footage folder at level {footage_level}")
-    
-    # Find example path to show structure
-    example_file = file_paths[0]
-    parts = [p for p in example_file.split(os.sep) if p]
-    
-    print("\nExample file structure:")
-    for i in range(min(footage_level - 1, len(parts))):
-        print(f"  {'  ' * i}└─ {parts[i]}")
-    
-    print(f"  {'  ' * (footage_level - 1)}└─ {parts[footage_level - 1]} ← Your footage folder")
-    
-    # Show available subfolder levels
-    available_levels = []
-    for i in range(footage_level, min(max_depth, len(parts))):
-        print(f"  {'  ' * footage_level}{'  ' * (i - footage_level)}└─ {parts[i]} ← Level {i - footage_level + 1} subfolder")
-        available_levels.append(i - footage_level + 1)
-    
-    if not available_levels:
-        print("\nNo subfolders available. Will import directly into footage folder.")
-        return 0
-    
-    print(f"\nHow many subfolder levels to recreate? (0-{max(available_levels)})")
-    print("0 = Import directly into footage folder (output to proxy folder directly)")
-    print("1 = Recreate first level subfolders (output to proxy/date/)")
-    print("2 = Recreate two levels of subfolders (output to proxy/date/cam/)")
-    print("\nNOTE: This will be used for both Media Pool structure AND output path!")
-    
-    while True:
-        try:
-            depth = int(input("\nEnter number of subfolder levels: "))
-            if 0 <= depth <= max(available_levels):
-                return depth
-            else:
-                print(f"Please enter a number between 0 and {max(available_levels)}")
-        except ValueError:
-            print("Please enter a valid number.")
-
-def organize_files_by_structure(file_paths, footage_level, subfolder_depth):
-    """Organize files by the selected folder structure"""
-    organized_files = {}  # footage_folder_path -> subfolder_path -> list of files
-    
-    for file_path in file_paths:
+        # Split path into parts
         parts = file_path.split(os.sep)
         parts_clean = [p for p in parts if p]
         
-        # Check if file is deep enough
-        if len(parts_clean) <= footage_level - 1:
+        # Skip files that don't have enough depth
+        if len(parts_clean) <= in_depth:
             continue
         
-        # Reconstruct footage folder path
+        # Extract the key path (what we'll use as the main folder)
+        # This is at in_depth level
         if os.sep == '/':  # Unix-like
-            footage_path = '/' + os.path.join(*parts_clean[:footage_level])
+            key_path = '/' + os.path.join(*parts_clean[:in_depth])
         else:  # Windows
-            footage_path = os.path.join(*parts_clean[:footage_level])
+            key_path = os.path.join(*parts_clean[:in_depth])
         
-        # Get subfolder path based on depth
-        if subfolder_depth == 0:
-            subfolder_key = ""  # No subfolders
-        else:
-            # Get the subfolder parts
-            subfolder_parts = parts_clean[footage_level:footage_level + subfolder_depth]
+        # Extract subfolder structure between in_depth and out_depth
+        if out_depth > in_depth:
+            subfolder_parts = parts_clean[in_depth:out_depth]
             subfolder_key = os.sep.join(subfolder_parts) if subfolder_parts else ""
+        else:
+            subfolder_key = ""
         
-        if footage_path not in organized_files:
-            organized_files[footage_path] = {}
-        if subfolder_key not in organized_files[footage_path]:
-            organized_files[footage_path][subfolder_key] = []
+        # Initialize structure
+        if key_path not in organized_files:
+            organized_files[key_path] = {}
+        if subfolder_key not in organized_files[key_path]:
+            organized_files[key_path][subfolder_key] = []
         
-        organized_files[footage_path][subfolder_key].append(file_path)
+        organized_files[key_path][subfolder_key].append(file_path)
     
     return organized_files
 
-def select_footage_folders(organized_files):
-    """Let user select which footage folders to process"""
-    footage_list = sorted(organized_files.keys())
+def filter_folders_at_in_depth(organized_files, in_depth, filter_mode=None, filter_list=None):
+    """Filter organized files based on folder selection at input depth"""
     
-    print("\nAvailable footage folders:")
-    for i, folder in enumerate(footage_list, 1):
-        folder_name = os.path.basename(folder)
-        total_files = sum(len(files) for files in organized_files[folder].values())
-        subfolders = [sf for sf in organized_files[folder].keys() if sf]
-        print(f"{i}. {folder_name} ({total_files} files in {len(organized_files[folder])} groups)")
-        if subfolders:
-            print(f"     Subfolders: {', '.join(subfolders[:3])}{'...' if len(subfolders) > 3 else ''}")
+    if not filter_mode:
+        return organized_files
     
-    selected = []
-    print("\nEnter footage folder numbers to process (comma-separated, or 'all' for all folders):")
-    choice = input().strip()
+    # Build a mapping of folder names to full paths
+    folder_map = {}
+    for key_path in organized_files.keys():
+        folder_name = os.path.basename(key_path.rstrip(os.sep))
+        folder_map[folder_name] = key_path
     
-    if choice.lower() == 'all':
-        return footage_list
+    if filter_mode == 'select':
+        # Interactive selection
+        print(f"\nFolders available at depth {in_depth}:")
+        folder_list = sorted(folder_map.keys())
+        
+        # Show folder list with file counts
+        for i, folder in enumerate(folder_list, 1):
+            full_path = folder_map[folder]
+            file_count = sum(len(files) for files in organized_files[full_path].values())
+            print(f"{i}. {folder} ({file_count} files)")
+        
+        print("\nSelect folders to process:")
+        print("Enter numbers (comma-separated), range (e.g., 2-4), or 'all':")
+        choice = input().strip()
+        
+        if choice.lower() == 'all':
+            return organized_files
+        
+        selected_indices = parse_selection(choice, len(folder_list))
+        selected_folders = [folder_list[i] for i in selected_indices]
+        
+        # Filter the organized_files dict
+        filtered = {}
+        for folder_name in selected_folders:
+            if folder_name in folder_map:
+                full_path = folder_map[folder_name]
+                filtered[full_path] = organized_files[full_path]
+        
+        return filtered
     
-    try:
-        indices = [int(x.strip()) - 1 for x in choice.split(',')]
-        selected = [footage_list[i] for i in indices if 0 <= i < len(footage_list)]
-        return selected
-    except:
-        print("Invalid selection. Please try again.")
-        return select_footage_folders(organized_files)
+    elif filter_mode == 'filter' and filter_list:
+        # Similar logic for filter mode...
+        filter_names = [f.strip() for f in filter_list.split(',')]
+        
+        filtered = {}
+        for folder_name in filter_names:
+            if folder_name in folder_map:
+                full_path = folder_map[folder_name]
+                filtered[full_path] = organized_files[full_path]
+        
+        if not filtered:
+            print(f"Warning: No matching folders found for filter: {filter_list}")
+            print(f"Available folders: {', '.join(sorted(folder_map.keys()))}")
+        else:
+            print(f"Filtering to folders: {', '.join(filter_names)}")
+        
+        return filtered
+    
+    return organized_files
+
+def parse_selection(choice, max_num):
+    """Parse user selection like '1,3,5-7' into list of indices"""
+    indices = []
+    parts = choice.split(',')
+    
+    for part in parts:
+        part = part.strip()
+        if '-' in part:
+            # Range like "2-4"
+            try:
+                start, end = part.split('-')
+                start_idx = int(start) - 1
+                end_idx = int(end) - 1
+                indices.extend(range(start_idx, end_idx + 1))
+            except:
+                continue
+        else:
+            # Single number
+            try:
+                idx = int(part) - 1
+                if 0 <= idx < max_num:
+                    indices.append(idx)
+            except:
+                continue
+    
+    return sorted(set(indices))  # Remove duplicates and sort
 
 def process_files_in_resolve(organized_files, selected_footage_folders, proxy_folder_path, subfolder_depth, is_directory_mode=False, clean_image=False):
     """Process files in DaVinci Resolve"""
     # Create project with appropriate name based on mode
     ProjectManager = resolve.GetProjectManager()
-    project_name = "proxy" if is_directory_mode else "proxy_redo"
+
+    # Generate timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # Create project name with timestamp
+    base_name = "proxy" if is_directory_mode else "proxy_redo"
+    project_name = f"{base_name}_{timestamp}"
+
     Project = ProjectManager.CreateProject(project_name)
     MediaStorage = resolve.GetMediaStorage()
     MediaPool = Project.GetMediaPool()
@@ -300,10 +280,11 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
                     Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
                     
                     # Build target directory using the same subfolder structure
+                    footage_folder_name = os.path.basename(footage_folder_path)
                     if subfolder_parts:
-                        target_dir = os.path.join(proxy_folder_path, *subfolder_parts)
+                        target_dir = os.path.join(proxy_folder_path, footage_folder_name, *subfolder_parts)
                     else:
-                        target_dir = proxy_folder_path
+                        target_dir = os.path.join(proxy_folder_path, footage_folder_name)
                     
                     print(f"    Render target: {target_dir}")
                     
@@ -332,8 +313,10 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
     else:
         print("Project saved. You can start rendering manually in DaVinci Resolve.")
 
-def process_json_mode(json_path, proxy_path, dataset, level=None, clean_image=False):
-    """Process using JSON file"""
+def process_json_mode(json_path, proxy_path, dataset, in_depth, out_depth, 
+                      clean_image=False, filter_mode=None, filter_list=None):
+    """Process using JSON file with input/output depth and folder filtering"""
+
     # Read JSON file
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
@@ -354,47 +337,43 @@ def process_json_mode(json_path, proxy_path, dataset, level=None, clean_image=Fa
     
     print(f"Found {len(file_list)} files in group{dataset}")
     
-    # Get folders at different levels
-    level_folders, max_depth = get_parent_folders_at_levels(file_list)
-    
-    # Let user select footage folder level
-    footage_level = select_footage_folder_level(level_folders)
-    
-    # Use provided level or let user select subfolder depth
-    if level is not None:
-        subfolder_depth = level
-        print(f"\nUsing specified subfolder depth: {subfolder_depth}")
-    else:
-        subfolder_depth = select_subfolder_depth(footage_level, max_depth, file_list)
-    
-    # Show configuration summary
+    # Show configuration
     print("\n=== Configuration Summary ===")
     print(f"JSON file: {json_path}")
     print(f"Dataset: group{dataset}")
-    print(f"Footage folder level: {footage_level}")
-    print(f"Subfolder depth: {subfolder_depth}")
-    if subfolder_depth == 0:
-        print("Media Pool: Files imported directly into footage folder")
-        print("Output path: Directly to proxy folder")
-    else:
-        print(f"Media Pool: {subfolder_depth} level(s) of subfolders will be recreated")
-        print(f"Output path: Same {subfolder_depth} level(s) will be used in proxy folder")
+    print(f"Input depth: {in_depth} (start from level {in_depth})")
+    print(f"Output depth: {out_depth} (include up to level {out_depth})")
     
-    # Organize files by the selected structure
-    organized_files = organize_files_by_structure(file_list, footage_level, subfolder_depth)
+    # Show example of what will be included
+    if file_list:
+        example = file_list[0]
+        parts = [p for p in example.split(os.sep) if p]
+        print(f"\nExample file: {example}")
+        print(f"Will extract: {os.sep.join(parts[in_depth-1:out_depth])}")
     
-    # Let user select which footage folders to process
-    selected_footage_folders = select_footage_folders(organized_files)
+    # Organize files
+    organized_files = organize_files_by_structure(file_list, in_depth, out_depth)
     
-    if not selected_footage_folders:
-        print("No footage folders selected.")
+    # Apply folder filtering if requested
+    organized_files = filter_folders_at_in_depth(
+        organized_files, in_depth, filter_mode, filter_list
+    )
+    
+    if not organized_files:
+        print("No folders to process after filtering.")
         sys.exit(1)
     
-    # Process in Resolve
-    process_files_in_resolve(organized_files, selected_footage_folders, proxy_path, subfolder_depth, is_directory_mode=False, clean_image=clean_image)
+    # Process filtered folders
+    selected_folders = list(organized_files.keys())
+    subfolder_depth = out_depth - in_depth
+    
+    process_files_in_resolve(organized_files, selected_folders, proxy_path, 
+                            subfolder_depth, is_directory_mode=False, clean_image=clean_image)
 
-def process_directory_mode(footage_path, proxy_path, level, clean_image=False):
-    """Process footage folder directly without JSON"""
+def process_directory_mode(footage_path, proxy_path, in_depth, out_depth, 
+                          clean_image=False, filter_mode=None, filter_list=None):
+    """Process footage folder with input/output depth and folder filtering"""
+
     if not os.path.exists(footage_path):
         print(f"Error: Footage folder does not exist: {footage_path}")
         sys.exit(1)
@@ -402,49 +381,53 @@ def process_directory_mode(footage_path, proxy_path, level, clean_image=False):
     print(f"\nDirectory mode:")
     print(f"Footage folder: {footage_path}")
     print(f"Proxy folder: {proxy_path}")
-    print(f"Subfolder levels: {level}")
+    print(f"Input depth: {in_depth}")
+    print(f"Output depth: {out_depth}")
     
-    # Create a simple organized structure
-    organized_files = {footage_path: {}}
+    # Collect ALL folders at the output depth level
+    # Let DaVinci decide what to import from these folders
+    target_folders = []
     
-    if level == 0:
-        # Import the footage folder directly
-        organized_files[footage_path][""] = [footage_path]
-    else:
-        # Get immediate subdirectories for level 1
-        if level == 1:
-            # Get immediate subdirectories only
-            for item in os.listdir(footage_path):
-                item_path = os.path.join(footage_path, item)
-                if os.path.isdir(item_path):
-                    # Each immediate subfolder becomes its own group
-                    organized_files[footage_path][item] = [item_path]
+    for root, dirs, files in os.walk(footage_path):
+        # Calculate current depth
+        relative_path = os.path.relpath(root, footage_path)
+        if relative_path == '.':
+            current_depth = 0
         else:
-            # For level > 1, walk through subdirectories
-            for root, dirs, files in os.walk(footage_path):
-                rel_path = os.path.relpath(root, footage_path)
-                
-                # Skip the root folder itself
-                if rel_path == '.':
-                    continue
-                    
-                path_parts = rel_path.split(os.sep)
-                
-                # Process directories at the specified level
-                if len(path_parts) == level:
-                    # Use parent folders as the key
-                    subfolder_key = os.sep.join(path_parts[:-1]) if len(path_parts) > 1 else ""
-                    if subfolder_key not in organized_files[footage_path]:
-                        organized_files[footage_path][subfolder_key] = []
-                    organized_files[footage_path][subfolder_key].append(root)
+            parts = [p for p in relative_path.split(os.sep) if p]
+            current_depth = len(parts)
+        
+        # Collect folders at exactly out_depth
+        if current_depth == out_depth:
+            target_folders.append(root)
+            # Don't go deeper than out_depth
+            dirs.clear()
     
-    # Debug print to see what we're importing
-    print("\nFolders to import:")
-    for key, folders in organized_files[footage_path].items():
-        print(f"  Group '{key}': {folders}")
+    if not target_folders:
+        print(f"No folders found at depth {out_depth}")
+        sys.exit(1)
     
-    # Process all folders
-    process_files_in_resolve(organized_files, [footage_path], proxy_path, level, is_directory_mode=True, clean_image=clean_image)
+    print(f"Found {len(target_folders)} folders at depth {out_depth}")
+    
+    # Organize based on depth structure
+    # Treat each folder as an item to import (DaVinci will handle the contents)
+    organized_files = organize_files_by_structure(target_folders, in_depth, out_depth)
+    
+    # Apply folder filtering if requested
+    organized_files = filter_folders_at_in_depth(
+        organized_files, in_depth, filter_mode, filter_list
+    )
+    
+    if not organized_files:
+        print("No folders to process after filtering.")
+        sys.exit(1)
+    
+    # Process filtered folders
+    selected_folders = list(organized_files.keys())
+    subfolder_depth = out_depth - in_depth
+    
+    process_files_in_resolve(organized_files, selected_folders, proxy_path, subfolder_depth,
+                            is_directory_mode=True, clean_image=clean_image)
 
 def is_json_file(path):
     """Check if the path is likely a JSON file"""
@@ -463,46 +446,55 @@ imports footage, and sets up proxy paths automatically. It preserves your folder
 up to the specified subfolder level.''',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''Examples:
-  Directory mode (positional arguments):
-    %(prog)s /path/to/footage /path/to/proxy                   # Directory mode, level=1 (default)
-    %(prog)s /path/to/footage /path/to/proxy 1                 # Directory mode, level=1
-    %(prog)s /path/to/footage /path/to/proxy 2                 # Directory mode, level=2
-    %(prog)s /path/to/footage /path/to/proxy 2 -c              # Directory mode, level=2, clean image (no burn-in)
+  Directory mode:
+    %(prog)s -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 4   # Include depth 4 
+    %(prog)s -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 5   # Include depth 4-5
+    
+  JSON mode:
+    %(prog)s -j comparison.json -d 1 -p /path/to/proxy -i 4 -o 4          # Include depth 4
 
-  Directory Mode (using flags):
-    %(prog)s -f /path/to/footage -p /path/to/proxy -l 1        # Directory mode, level=1
-    %(prog)s -f /path/to/footage -p /path/to/proxy -l 2 -c     # Directory mode, level=2, clean image (no burn-in)
+  Interactive selection of Shooting day folders
+    %(prog)s -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --select  # Include depth 4-5, selecting from depth 4
+    # Will show:
+    # 1. Shooting_Day_1 (150 files)
+    # 2. Shooting_Day_2  (200 files)
+    # 3. Shooting_Day_3  (180 files)
+    # 4. Shooting_Day_4  (220 files)
+    # 5. Shooting_Day_5  (190 files)
+    # Enter: 2-4  (to select Shooting_Day_2, Shooting_Day_3, Shooting_Day_3)       # Selected Shooting day
 
-  JSON mode (positional arguments):
-    %(prog)s comparison.json 1 /path/to/proxy                  # JSON mode, dataset=1, level=1 (default)
-    %(prog)s comparison.json 1 /path/to/proxy 1                # JSON mode, dataset=1, level=1
-    %(prog)s comparison.json 2 /path/to/proxy 2                # JSON mode, dataset=2, level=2
-
-  JSON mode (using flags):
-    %(prog)s -j comparison.json -d 1 -p /path/to/proxy -l 2    # JSON mode, dataset=1, level=2
-    %(prog)s -j comparison.json -d 1 -p /path/to/proxy -l 2 -c # JSON mode, dataset=1, level=2, clean image (no burn-in)
+  Direct filtering
+    %(prog)s -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --filter "Shooting_Day_2,Shooting_Day_3"  # Specific Date
 '''
     )
     
-    # Create mutually exclusive group for the two modes
     mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument('-j', '--json', help='Path to JSON file from file_compare (JSON mode)')
     mode_group.add_argument('-f', '--footage', help='Footage folder path (Direct mode)')
-    
-    # Other arguments
-    parser.add_argument('-p', '--proxy', help='Proxy folder path')
-    parser.add_argument('-l', '--level', type=int, help='Subfolder levels to recreate')
+    mode_group.add_argument('-j', '--json', help='Path to JSON file from file_compare (JSON mode)')
     parser.add_argument('-d', '--dataset', type=int, choices=[1, 2], 
                         help='Select dataset: 1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)')
+    parser.add_argument('-p', '--proxy', help='Proxy folder path')
+    parser.add_argument('-i', '--in-depth', type=int, default=4,
+                       help='Directory depth to start from (default: 4, typically Shooting day folder)')
+    parser.add_argument('-o', '--out-depth', type=int, default=4,
+                       help='Directory depth to include up to (default: 4, typically Shooting day folder)')
+
+    # Add folder selection options
+    selection_group = parser.add_mutually_exclusive_group()
+    selection_group.add_argument('--select', action='store_true',
+                                help='Interactively select which folders to process at input depth')
+    selection_group.add_argument('--filter', type=str,
+                                help='Comma-separated list of folder names to process (e.g., "Shooting_Day_2,Shooting_Day_3,Shooting_Day_4")')
+    
+    # Add a switch for turn off burn-in
     parser.add_argument('-c', '--clean-image', action='store_true', 
                     help='Generate clean proxies without burn-in overlays')
     
-    # Handle positional arguments for default mode
+    # Handle positional arguments for backward compatibility
     parser.add_argument('args', nargs='*', help='Positional arguments for default mode')
-    
+
     args = parser.parse_args()
-    
-    # Determine which mode we're in
+
     if args.json:
         # JSON mode with flags
         if not args.proxy:
@@ -510,12 +502,27 @@ up to the specified subfolder level.''',
         
         json_path = args.json
         proxy_path = clean_path_input(args.proxy)
-        dataset = args.dataset if args.dataset else 1  # Default to 1
-        level = args.level  # Can be None
+        dataset = args.dataset if args.dataset else 1
+        in_depth = args.in_depth
+        out_depth = args.out_depth
         
-        # Process JSON mode
-        process_json_mode(json_path, proxy_path, dataset, level, args.clean_image)
+        # Validate depths
+        if out_depth < in_depth:
+            parser.error("Output depth must be >= input depth")
         
+        # Determine filter mode
+        filter_mode = None
+        filter_list = None
+        if args.select:
+            filter_mode = 'select'
+        elif args.filter:
+            filter_mode = 'filter'
+            filter_list = args.filter
+        
+        # Process JSON mode with filtering
+        process_json_mode(json_path, proxy_path, dataset, in_depth, out_depth, 
+                         args.clean_image, filter_mode, filter_list)
+
     elif args.footage:
         # Directory mode with flags
         if not args.proxy:
@@ -523,63 +530,60 @@ up to the specified subfolder level.''',
         
         footage_path = clean_path_input(args.footage)
         proxy_path = clean_path_input(args.proxy)
-        level = args.level if args.level is not None else 1  # Default to 1
+        in_depth = args.in_depth
+        out_depth = args.out_depth
         
-        # Process directory mode
-        process_directory_mode(footage_path, proxy_path, level, args.clean_image)
+        # Validate depths
+        if out_depth < in_depth:
+            parser.error("Output depth must be >= input depth")
+
+        # Determine filter mode
+        filter_mode = None
+        filter_list = None
+        if args.select:
+            filter_mode = 'select'
+        elif args.filter:
+            filter_mode = 'filter'
+            filter_list = args.filter
         
+        # Process directory mode with filtering
+        process_directory_mode(footage_path, proxy_path, in_depth, out_depth, 
+                             args.clean_image, filter_mode, filter_list)
+
     elif len(args.args) >= 2:
-        # Default mode - need to determine if first arg is JSON or footage folder
-        first_arg = clean_path_input(args.args[0])
+        # Positional arguments mode (backward compatibility)
+        footage_path = clean_path_input(args.args[0])
+        proxy_path = clean_path_input(args.args[1])
+        in_depth = args.in_depth
+        out_depth = args.out_depth
         
-        if is_json_file(first_arg):
-            # JSON mode: json_file dataset proxy [level]
-            if len(args.args) < 3:
-                parser.error("JSON mode requires: json_file dataset proxy_folder [level]")
-            
-            json_path = first_arg
-            try:
-                dataset = int(args.args[1])
-                if dataset not in [1, 2]:
-                    parser.error("Dataset must be 1 or 2")
-            except ValueError:
-                parser.error("Dataset must be 1 or 2")
-            
-            proxy_path = clean_path_input(args.args[2])
-            
-            # Optional level
-            level = None
-            if len(args.args) >= 4:
-                try:
-                    level = int(args.args[3])
-                except ValueError:
-                    parser.error("Level must be a number")
-            
-            # Process JSON mode
-            process_json_mode(json_path, proxy_path, dataset, level, False)  # Default to False for positional
-            
+        # Validate depths
+        if out_depth < in_depth:
+            parser.error("Output depth must be >= input depth")
+        
+        # Determine filter mode
+        filter_mode = None
+        filter_list = None
+        if args.select:
+            filter_mode = 'select'
+        elif args.filter:
+            filter_mode = 'filter'
+            filter_list = args.filter
+
+        # Check if first arg is JSON file
+        if is_json_file(footage_path):
+            # JSON mode
+            dataset = args.dataset if args.dataset else 1
+            process_json_mode(footage_path, proxy_path, dataset, in_depth, out_depth,
+                            args.clean_image, filter_mode, filter_list)
         else:
-            # Directory mode: footage_folder proxy_folder [level]
-            footage_path = first_arg
-            proxy_path = clean_path_input(args.args[1])
-            
-            # Optional level, default to 1
-            level = 1
-            if len(args.args) >= 3:
-                try:
-                    level = int(args.args[2])
-                except ValueError:
-                    parser.error("Level must be a number")
-            
-            # Process directory mode
-            process_directory_mode(footage_path, proxy_path, level, False)  # Default to False for positional
-            
+            # Directory mode
+            process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
+                                 args.clean_image, filter_mode, filter_list)
+    
     else:
-        parser.error("Usage:\n"
-                    "  JSON mode:      script.py -j json_file -d dataset -p proxy_folder [-l level]\n"
-                    "  Directory mode: script.py -f footage_folder -p proxy_folder [-l level]\n"
-                    "  Default:        script.py json_file dataset proxy_folder [level]\n"
-                    "                  script.py footage_folder proxy_folder [level]")
+        parser.print_help()
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
