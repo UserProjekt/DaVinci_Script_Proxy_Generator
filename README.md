@@ -74,8 +74,6 @@ In our workflow,We place the Proxy folder alongside the Footage folder, feel fre
       - 📁 A002_0210Z9
 
 
-Here's the rewritten README based on your current `--help`:
-
 ## Examples
 
 This script supports two modes:
