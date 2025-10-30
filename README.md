@@ -122,9 +122,6 @@ proxy_generator.py -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 4
 
 # Process multiple depth levels (depth 4-5)
 proxy_generator.py -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 5
-
-# Process all depths from level 4 down
-proxy_generator.py -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 10
 ```
 
 **JSON Mode:**
@@ -165,8 +162,8 @@ proxy_generator.py -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 -c
 **Backward Compatibility (positional arguments):**
 ```bash
 # Old format still supported
-proxy_generator.py /path/to/footage /path/to/proxy          # Directory mode, level=1 (default)
-proxy_generator.py comparison.json 1 /path/to/proxy         # JSON mode, dataset=1, level=1
+proxy_generator.py /path/to/footage /path/to/proxy          # Directory mode, depth=4 (default)
+proxy_generator.py comparison.json 1 /path/to/proxy         # JSON mode, dataset=1, depth=4
 ```
 
 ### Recovery from Crashes
