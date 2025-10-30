@@ -4,7 +4,7 @@ This script, written in Python for DaVinci Resolve, automates the process of imp
 
 This preset is configured for Full High Definition (FHD) video with H.265 encoding, 4:2:0 chroma subsampling, 8-bit color depth, and a video bitrate of 5Mbps. These settings are optimized for hardware decoding and systems with low I/O performance. Reduced file size is also better for transfer and storage.
 
-Ensure you have a render preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 290:
+Ensure you have a render preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 280:
 
       
       Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
@@ -12,7 +12,7 @@ Ensure you have a render preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively,
 
 The script automatically applies source clip name and source timecode overlay burn-ins to the generated proxies by default. This feature uses a custom data burn-in preset titled 'Burn-in' and can be disabled manually if needed.
 
-Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 191:
+Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 181:
   
     
       Project.LoadBurnInPreset("burn-in")
@@ -56,10 +56,10 @@ For DaVinci Resolve installed via the Apple App Store:
 **The industray standard footage folder structure is outlined below. Please ensure that the date-specific folders (e.g., 'Shooting Day 1', 'Shooting Day 2') are situated directly beneath the 'Footage' folder.**
 - 📁 Production
   - 📁 Footage
-    - 📁 Shooting Day 1
+    - 📁 Shooting_Day_1
       - 📁 A001_0210Z9
       - 📁 B001_029AC3
-    - 📁 Shooting Day 2
+    - 📁 Shooting_Day_2
       - 📁 A002_0210Z9
 
   
@@ -67,10 +67,10 @@ In our workflow,We place the Proxy folder alongside the Footage folder, feel fre
 - 📁 Production
   - 📁 Proxy
   - 📁 Footage
-    - 📁 Shooting Day 1
+    - 📁 Shooting_Day_1
       - 📁 A001_0210Z9
       - 📁 B001_029AC3
-    - 📁 Shooting Day 2
+    - 📁 Shooting_Day_2
       - 📁 A002_0210Z9
 
 
@@ -122,25 +122,4 @@ proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -l 2 # JSON mode, d
 
 ### Recovery from Crashes
 
-If DaVinci Resolve crashes during rendering, simply reopen the 'Proxy' project and restart rendering. The script automatically saves the project before rendering, so your progress is preserved.
-
-
-## Update
-
-### New in v1.1.0:
-- JSON input support
-
-### New in v1.2.0:
-- Burn-in preset support
-
-### New in v1.2.1:
-- Correct resolution handling for DCI 4K & 2K footage
-
-### New in v1.2.2:
-- Renamed "Direct mode" to "Directory mode" for clarity
-
-### New in v1.2.3:
-- Fixed --clean-image option
-
-### New in v1.2.4:
-- Bug fix: Corrected --clean-image argument handling
+If DaVinci Resolve crashes during rendering, simply reopen project and restart rendering. The script automatically saves the project before rendering, so your progress is preserved.
