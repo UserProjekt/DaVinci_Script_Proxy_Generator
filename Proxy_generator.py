@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 __author__ = 'userprojekt'
 
 
