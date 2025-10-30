@@ -74,50 +74,101 @@ In our workflow,We place the Proxy folder alongside the Footage folder, feel fre
       - 📁 A002_0210Z9
 
 
+Here's the rewritten README based on your current `--help`:
+
 ## Examples
 
-**Important:** Ensure no project named 'Proxy' exists in the DaVinci Resolve Project Manager before running the script.
+This script supports two modes:
+1. **Directory Mode**: Process footage folders within a directory tree with automatic bin organization
+2. **JSON Mode**: Process specific folders listed in a JSON file (supports folders from different locations)
 
-The script supports two modes:
+The script creates organized bin structures in DaVinci Resolve based on your folder hierarchy,
+imports footage, and sets up proxy paths automatically. It uses depth-based organization to
+preserve your folder structure at specified levels.
 
-1. **Directory Mode:** Generate proxies directly from footage folders with automatic bin organization
-2. **JSON Mode:** Re-generate missing proxies based on file comparison results from a JSON file
-
-The script automatically creates organized bin structures in DaVinci Resolve that mirror your folder hierarchy, imports footage, and configures proxy paths. Your folder structure is preserved up to the specified subfolder level.
+### New in v1.3.0:
+- **Depth-based processing** with `-i` (input depth) and `-o` (output depth) for precise folder control
+- **Interactive folder selection** with `--select` flag
+- **Direct folder filtering** with `--filter` option
+- **Clean proxy generation** without burn-in overlays using `-c` flag
 
 **Positional arguments:**
-- `args` - Positional arguments for default mode
+- `args` - Positional arguments for backward compatibility
+
+**Mode selection (mutually exclusive):**
+- `-f, --footage FOOTAGE` - Footage folder path (Directory mode)
+- `-j, --json JSON` - Path to JSON file containing folder list (JSON mode)
+
+**Required arguments:**
+- `-p, --proxy PROXY` - Proxy folder path
+
+**Depth control:**
+- `-i, --in-depth IN_DEPTH` - Directory depth to start from (default: 4, typically Shooting day folder)
+- `-o, --out-depth OUT_DEPTH` - Directory depth to include up to (default: 4, typically Shooting day folder)
+
+**Folder selection (mutually exclusive):**
+- `--select` - Interactively select which folders to process at input depth
+- `--filter FILTER` - Comma-separated list of folder names to process
 
 **Optional arguments:**
+- `-d, --dataset {1,2}` - Select dataset: 1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)
+- `-c, --clean-image` - Generate clean proxies without burn-in overlays
 - `-h, --help` - Show help message and exit
-- `-j JSON, --json JSON` - Path to JSON file from file_compare (JSON mode)
-- `-f FOOTAGE, --footage FOOTAGE` - Footage folder path (Directory mode)
-- `-p PROXY, --proxy PROXY` - Proxy folder path
-- `-l LEVEL, --level LEVEL` - Subfolder levels to recreate (default: 1)
-- `-d {1,2}, --dataset {1,2}` - Select dataset for JSON mode:1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)
 
-**Directory Mode (using positional arguments):**
+### Examples
+
+**Directory Mode:**
 ```bash
+# Process single depth level (depth 4 only)
+proxy_generator.py -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 4
+
+# Process multiple depth levels (depth 4-5)
+proxy_generator.py -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 5
+
+# Process all depths from level 4 down
+proxy_generator.py -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 10
+```
+
+**JSON Mode:**
+```bash
+# Process folders listed in JSON file at depth 4
+proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -i 4 -o 4
+
+# Process with unlimited depth
+proxy_generator.py -j folders.json -p /path/to/proxy -i 3 -o 0
+```
+
+**Interactive Selection:**
+```bash
+# Select specific folders interactively
+proxy_generator.py -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --select
+
+# Will display:
+# 1. Shooting_Day_1 (150 files)
+# 2. Shooting_Day_2 (200 files)
+# 3. Shooting_Day_3 (180 files)
+# 4. Shooting_Day_4 (220 files)
+# 5. Shooting_Day_5 (190 files)
+# Enter: 2-4  (selects Shooting_Day_2, Shooting_Day_3, Shooting_Day_4)
+```
+
+**Direct Filtering:**
+```bash
+# Process specific folders by name
+proxy_generator.py -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --filter "Shooting_Day_2,Shooting_Day_3"
+```
+
+**Clean Proxies (without burn-in):**
+```bash
+# Generate clean proxies without overlays
+proxy_generator.py -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 -c
+```
+
+**Backward Compatibility (positional arguments):**
+```bash
+# Old format still supported
 proxy_generator.py /path/to/footage /path/to/proxy          # Directory mode, level=1 (default)
-proxy_generator.py /path/to/footage /path/to/proxy 1        # Directory mode, level=1
-proxy_generator.py /path/to/footage /path/to/proxy 2        # Directory mode, level=2
-```
-
-**Directory Mode (using flags):**
-```bash
-proxy_generator.py -f /path/to/footage -p /path/to/proxy -l 2 # Directory mode, level=2
-```
-
-**JSON Mode (using positional arguments):**
-```bash
 proxy_generator.py comparison.json 1 /path/to/proxy         # JSON mode, dataset=1, level=1
-proxy_generator.py comparison.json 1 /path/to/proxy 1       # JSON mode, dataset=1, level=1
-proxy_generator.py comparison.json 2 /path/to/proxy 2       # JSON mode, dataset=2, level=2
-```
-
-**JSON Mode (using flags):**
-```bash
-proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -l 2 # JSON mode, dataset=1, level=2
 ```
 
 ### Recovery from Crashes
