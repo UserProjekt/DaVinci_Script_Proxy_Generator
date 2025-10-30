@@ -378,18 +378,26 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
         print(f"Error: Footage folder does not exist: {footage_path}")
         sys.exit(1)
     
+    # Calculate the base depth - the footage path itself has some depth
+    footage_parts = [p for p in footage_path.split(os.sep) if p]
+    base_depth = len(footage_parts)  # This is the absolute depth of the footage folder
+    
+    # Adjust depths to be relative to footage folder
+    # When user says -i 4 -o 4, they mean depth 1 relative to footage folder
+    # When user says -i 5 -o 5, they mean depth 2 relative to footage folder
+    relative_in_depth = in_depth - base_depth
+    relative_out_depth = out_depth - base_depth
+    
     print(f"\nDirectory mode:")
     print(f"Footage folder: {footage_path}")
     print(f"Proxy folder: {proxy_path}")
-    print(f"Input depth: {in_depth}")
-    print(f"Output depth: {out_depth}")
+    print(f"Working at relative depth: {relative_in_depth} to {relative_out_depth}")
     
-    # Collect ALL folders at the output depth level
-    # Let DaVinci decide what to import from these folders
+    # Collect ALL folders at the relative output depth level
     target_folders = []
     
     for root, dirs, files in os.walk(footage_path):
-        # Calculate current depth
+        # Calculate current depth relative to footage folder
         relative_path = os.path.relpath(root, footage_path)
         if relative_path == '.':
             current_depth = 0
@@ -397,20 +405,19 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
             parts = [p for p in relative_path.split(os.sep) if p]
             current_depth = len(parts)
         
-        # Collect folders at exactly out_depth
-        if current_depth == out_depth:
+        # Collect folders at exactly relative_out_depth
+        if current_depth == relative_out_depth:
             target_folders.append(root)
             # Don't go deeper than out_depth
             dirs.clear()
     
     if not target_folders:
-        print(f"No folders found at depth {out_depth}")
+        print(f"No folders found at relative depth {relative_out_depth}")
         sys.exit(1)
     
-    print(f"Found {len(target_folders)} folders at depth {out_depth}")
+    print(f"Found {len(target_folders)} folders at relative depth {relative_out_depth}")
     
-    # Organize based on depth structure
-    # Treat each folder as an item to import (DaVinci will handle the contents)
+    # For organize_files_by_structure, we need to use the absolute depths
     organized_files = organize_files_by_structure(target_folders, in_depth, out_depth)
     
     # Apply folder filtering if requested
