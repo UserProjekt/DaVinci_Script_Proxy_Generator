@@ -378,26 +378,34 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
         print(f"Error: Footage folder does not exist: {footage_path}")
         sys.exit(1)
     
-    # Calculate the base depth - the footage path itself has some depth
+    # Calculate the depth of the footage folder itself
     footage_parts = [p for p in footage_path.split(os.sep) if p]
-    base_depth = len(footage_parts)  # This is the absolute depth of the footage folder
+    footage_depth = len(footage_parts)  # Typically 3
     
-    # Adjust depths to be relative to footage folder
-    # When user says -i 4 -o 4, they mean depth 1 relative to footage folder
-    # When user says -i 5 -o 5, they mean depth 2 relative to footage folder
-    relative_in_depth = in_depth - base_depth
-    relative_out_depth = out_depth - base_depth
+    # Validate that in_depth and out_depth are greater than footage_depth
+    if in_depth <= footage_depth:
+        print(f"Error: Input depth ({in_depth}) must be greater than footage folder depth ({footage_depth})")
+        print(f"Your footage folder has {footage_depth} levels: {footage_path}")
+        print(f"Use -i {footage_depth + 1} or higher")
+        sys.exit(1)
+    
+    if out_depth <= footage_depth:
+        print(f"Error: Output depth ({out_depth}) must be greater than footage folder depth ({footage_depth})")
+        sys.exit(1)
+    
+    # Calculate relative depths from the footage folder
+    relative_in_depth = in_depth - footage_depth  # e.g., 4-3=1
+    relative_out_depth = out_depth - footage_depth  # e.g., 10-3=7
     
     print(f"\nDirectory mode:")
-    print(f"Footage folder: {footage_path}")
+    print(f"Footage folder: {footage_path} (depth: {footage_depth})")
     print(f"Proxy folder: {proxy_path}")
-    print(f"Working at relative depth: {relative_in_depth} to {relative_out_depth}")
+    print(f"Input depth: {in_depth} (scanning {relative_in_depth} level(s) deep from footage folder)")
+    print(f"Output depth: {out_depth} (including up to {relative_out_depth} level(s) deep from footage folder)")
     
-    # Collect ALL folders at the relative output depth level
-    target_folders = []
-    
+    # First, find all folders at the input depth level
+    input_depth_folders = []
     for root, dirs, files in os.walk(footage_path):
-        # Calculate current depth relative to footage folder
         relative_path = os.path.relpath(root, footage_path)
         if relative_path == '.':
             current_depth = 0
@@ -405,29 +413,133 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
             parts = [p for p in relative_path.split(os.sep) if p]
             current_depth = len(parts)
         
-        # Collect folders at exactly relative_out_depth
-        if current_depth == relative_out_depth:
-            target_folders.append(root)
-            # Don't go deeper than out_depth
+        # Collect folders at exactly relative_in_depth
+        if current_depth == relative_in_depth:
+            input_depth_folders.append(root)
+        
+        # Don't go deeper than necessary for finding input folders
+        if current_depth >= relative_in_depth:
             dirs.clear()
     
-    if not target_folders:
-        print(f"No folders found at relative depth {relative_out_depth}")
+    if not input_depth_folders:
+        print(f"No folders found at input depth {in_depth}")
         sys.exit(1)
     
-    print(f"Found {len(target_folders)} folders at relative depth {relative_out_depth}")
+    print(f"Found {len(input_depth_folders)} folders at input depth {in_depth}")
     
-    # For organize_files_by_structure, we need to use the absolute depths
-    organized_files = organize_files_by_structure(target_folders, in_depth, out_depth)
+    # Now for each input folder, find all folders at output depth OR max depth if less
+    target_folders_by_input = {}
+    folder_max_depths = {}
     
-    # Apply folder filtering if requested
-    organized_files = filter_folders_at_in_depth(
-        organized_files, in_depth, filter_mode, filter_list
-    )
+    for input_folder in input_depth_folders:
+        target_folders = []
+        max_depth_found = relative_in_depth
+        
+        # Walk through this input folder to find folders at output depth or max depth
+        for root, dirs, files in os.walk(input_folder):
+            relative_path = os.path.relpath(root, footage_path)
+            if relative_path == '.':
+                current_depth = 0
+            else:
+                parts = [p for p in relative_path.split(os.sep) if p]
+                current_depth = len(parts)
+            
+            # Track the maximum depth found for this input folder
+            if current_depth > max_depth_found:
+                max_depth_found = current_depth
+            
+            # Collect folders at exactly relative_out_depth
+            if current_depth == relative_out_depth:
+                target_folders.append(root)
+                dirs.clear()  # Don't go deeper
+            elif current_depth > relative_out_depth:
+                dirs.clear()  # Don't go deeper than output depth
+        
+        # If no folders found at output depth, use folders at max depth found
+        if not target_folders and max_depth_found < relative_out_depth:
+            # Re-walk to get folders at max depth
+            for root, dirs, files in os.walk(input_folder):
+                relative_path = os.path.relpath(root, footage_path)
+                if relative_path == '.':
+                    current_depth = 0
+                else:
+                    parts = [p for p in relative_path.split(os.sep) if p]
+                    current_depth = len(parts)
+                
+                if current_depth == max_depth_found:
+                    target_folders.append(root)
+        
+        # Store the results
+        if target_folders:
+            target_folders_by_input[input_folder] = target_folders
+            folder_max_depths[input_folder] = max_depth_found + footage_depth  # Convert back to absolute depth
     
-    if not organized_files:
+    # Apply filtering at input depth level
+    if filter_mode == 'select':
+        print(f"\nFolders available at depth {in_depth}:")
+        folder_names = []
+        folder_paths = []
+        
+        for input_folder, targets in target_folders_by_input.items():
+            folder_name = os.path.basename(input_folder)
+            actual_depth = folder_max_depths[input_folder]
+            depth_info = f" (max depth: {actual_depth})" if actual_depth < out_depth else ""
+            folder_names.append(f"{folder_name}{depth_info}")
+            folder_paths.append(input_folder)
+        
+        for i, folder_name in enumerate(folder_names, 1):
+            target_count = len(target_folders_by_input[folder_paths[i-1]])
+            print(f"{i}. {folder_name} - {target_count} folders")
+        
+        print("\nSelect folders to process:")
+        print("Enter numbers (comma-separated), range (e.g., 2-4), or 'all':")
+        choice = input().strip()
+        
+        if choice.lower() != 'all':
+            selected_indices = parse_selection(choice, len(folder_paths))
+            selected_paths = [folder_paths[i] for i in selected_indices]
+            
+            # Filter the results
+            filtered = {}
+            for path in selected_paths:
+                if path in target_folders_by_input:
+                    filtered[path] = target_folders_by_input[path]
+            target_folders_by_input = filtered
+    
+    elif filter_mode == 'filter' and filter_list:
+        filter_names = [f.strip() for f in filter_list.split(',')]
+        filtered = {}
+        
+        for input_folder, targets in target_folders_by_input.items():
+            folder_name = os.path.basename(input_folder)
+            if folder_name in filter_names:
+                filtered[input_folder] = targets
+        
+        if not filtered:
+            print(f"Warning: No matching folders found for filter: {filter_list}")
+            available = [os.path.basename(f) for f in target_folders_by_input.keys()]
+            print(f"Available folders: {', '.join(available)}")
+            sys.exit(1)
+        
+        target_folders_by_input = filtered
+    
+    if not target_folders_by_input:
         print("No folders to process after filtering.")
         sys.exit(1)
+    
+    # Flatten all target folders for processing
+    all_target_folders = []
+    for targets in target_folders_by_input.values():
+        all_target_folders.extend(targets)
+    
+    print(f"\nTotal folders to process: {len(all_target_folders)}")
+    
+    # Organize for processing
+    organized_files = organize_files_by_structure(all_target_folders, in_depth, out_depth)
+    
+    if not organized_files:
+        # Fallback for simple case
+        organized_files = {footage_path: {"": all_target_folders}}
     
     # Process filtered folders
     selected_folders = list(organized_files.keys())
