@@ -116,7 +116,7 @@ preserve your folder structure at specified levels.
 ### Examples
 
 **Directory Mode:**
-```bash
+```zsh
 # Process single depth level (depth 4 only)
 proxy_generator.py -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 4
 
@@ -125,7 +125,7 @@ proxy_generator.py -f /volume/Production/Footage/ -p /path/to/proxy -i 4 -o 5
 ```
 
 **JSON Mode:**
-```bash
+```zsh
 # Process folders listed in JSON file at depth 4
 proxy_generator.py -j comparison.json -d 1 -p /path/to/proxy -i 4 -o 4
 
@@ -134,7 +134,7 @@ proxy_generator.py -j folders.json -p /path/to/proxy -i 3 -o 0
 ```
 
 **Interactive Selection:**
-```bash
+```zsh
 # Select specific folders interactively
 proxy_generator.py -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --select
 
@@ -148,19 +148,19 @@ proxy_generator.py -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --select
 ```
 
 **Direct Filtering:**
-```bash
+```zsh
 # Process specific folders by name
 proxy_generator.py -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --filter "Shooting_Day_2,Shooting_Day_3"
 ```
 
 **Clean Proxies (without burn-in):**
-```bash
+```zsh
 # Generate clean proxies without overlays
 proxy_generator.py -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 -c
 ```
 
 **Backward Compatibility (positional arguments):**
-```bash
+```zsh
 # Old format still supported
 proxy_generator.py /path/to/footage /path/to/proxy          # Directory mode, depth=4 (default)
 proxy_generator.py comparison.json 1 /path/to/proxy         # JSON mode, dataset=1, depth=4
