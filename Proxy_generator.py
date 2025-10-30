@@ -372,7 +372,7 @@ def process_json_mode(json_path, proxy_path, dataset, in_depth, out_depth,
 
 def process_directory_mode(footage_path, proxy_path, in_depth, out_depth, 
                           clean_image=False, filter_mode=None, filter_list=None):
-    """Process footage folder with input/output depth and folder filtering"""
+    """Process footage folder with absolute input/output depths"""
 
     if not os.path.exists(footage_path):
         print(f"Error: Footage folder does not exist: {footage_path}")
@@ -380,52 +380,34 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
     
     # Calculate the depth of the footage folder itself
     footage_parts = [p for p in footage_path.split(os.sep) if p]
-    footage_depth = len(footage_parts)  # Typically 3
-    
-    # Validate that in_depth and out_depth are greater than footage_depth
-    if in_depth <= footage_depth:
-        print(f"Error: Input depth ({in_depth}) must be greater than footage folder depth ({footage_depth})")
-        print(f"Your footage folder has {footage_depth} levels: {footage_path}")
-        print(f"Use -i {footage_depth + 1} or higher")
-        sys.exit(1)
-    
-    if out_depth <= footage_depth:
-        print(f"Error: Output depth ({out_depth}) must be greater than footage folder depth ({footage_depth})")
-        sys.exit(1)
-    
-    # Calculate relative depths from the footage folder
-    relative_in_depth = in_depth - footage_depth  # e.g., 4-3=1
-    relative_out_depth = out_depth - footage_depth  # e.g., 10-3=7
+    footage_depth = len(footage_parts)
     
     print(f"\nDirectory mode:")
     print(f"Footage folder: {footage_path} (depth: {footage_depth})")
     print(f"Proxy folder: {proxy_path}")
-    print(f"Input depth: {in_depth} (scanning {relative_in_depth} level(s) deep from footage folder)")
-    print(f"Output depth: {out_depth} (including up to {relative_out_depth} level(s) deep from footage folder)")
+    print(f"Input depth: {in_depth} (absolute)")
+    print(f"Output depth: {out_depth} (absolute)")
     
-    # First, find all folders at the input depth level
+    # First, find all folders at the input depth level within the footage tree
     input_depth_folders = []
     for root, dirs, files in os.walk(footage_path):
-        relative_path = os.path.relpath(root, footage_path)
-        if relative_path == '.':
-            current_depth = 0
-        else:
-            parts = [p for p in relative_path.split(os.sep) if p]
-            current_depth = len(parts)
+        # Calculate absolute depth of current folder
+        root_parts = [p for p in root.split(os.sep) if p]
+        current_depth = len(root_parts)
         
-        # Collect folders at exactly relative_in_depth
-        if current_depth == relative_in_depth:
+        # Collect folders at exactly in_depth
+        if current_depth == in_depth:
             input_depth_folders.append(root)
         
-        # Don't go deeper than necessary for finding input folders
-        if current_depth >= relative_in_depth:
+        # Don't go deeper than necessary
+        if current_depth >= in_depth:
             dirs.clear()
     
     if not input_depth_folders:
-        print(f"No folders found at input depth {in_depth}")
+        print(f"No folders found at depth {in_depth} within the footage tree")
         sys.exit(1)
     
-    print(f"Found {len(input_depth_folders)} folders at input depth {in_depth}")
+    print(f"Found {len(input_depth_folders)} folders at depth {in_depth}")
     
     # Now for each input folder, find all folders at output depth OR max depth if less
     target_folders_by_input = {}
@@ -433,38 +415,30 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
     
     for input_folder in input_depth_folders:
         target_folders = []
-        max_depth_found = relative_in_depth
+        max_depth_found = in_depth
         
         # Walk through this input folder to find folders at output depth or max depth
         for root, dirs, files in os.walk(input_folder):
-            relative_path = os.path.relpath(root, footage_path)
-            if relative_path == '.':
-                current_depth = 0
-            else:
-                parts = [p for p in relative_path.split(os.sep) if p]
-                current_depth = len(parts)
+            root_parts = [p for p in root.split(os.sep) if p]
+            current_depth = len(root_parts)
             
             # Track the maximum depth found for this input folder
             if current_depth > max_depth_found:
                 max_depth_found = current_depth
             
-            # Collect folders at exactly relative_out_depth
-            if current_depth == relative_out_depth:
+            # Collect folders at exactly out_depth
+            if current_depth == out_depth:
                 target_folders.append(root)
                 dirs.clear()  # Don't go deeper
-            elif current_depth > relative_out_depth:
+            elif current_depth > out_depth:
                 dirs.clear()  # Don't go deeper than output depth
         
         # If no folders found at output depth, use folders at max depth found
-        if not target_folders and max_depth_found < relative_out_depth:
+        if not target_folders and max_depth_found < out_depth:
             # Re-walk to get folders at max depth
             for root, dirs, files in os.walk(input_folder):
-                relative_path = os.path.relpath(root, footage_path)
-                if relative_path == '.':
-                    current_depth = 0
-                else:
-                    parts = [p for p in relative_path.split(os.sep) if p]
-                    current_depth = len(parts)
+                root_parts = [p for p in root.split(os.sep) if p]
+                current_depth = len(root_parts)
                 
                 if current_depth == max_depth_found:
                     target_folders.append(root)
@@ -472,7 +446,11 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
         # Store the results
         if target_folders:
             target_folders_by_input[input_folder] = target_folders
-            folder_max_depths[input_folder] = max_depth_found + footage_depth  # Convert back to absolute depth
+            folder_max_depths[input_folder] = max_depth_found
+        else:
+            # If input folder has no subfolders, include itself
+            target_folders_by_input[input_folder] = [input_folder]
+            folder_max_depths[input_folder] = in_depth
     
     # Apply filtering at input depth level
     if filter_mode == 'select':
