@@ -84,12 +84,6 @@ The script creates organized bin structures in DaVinci Resolve based on your fol
 imports footage, and sets up proxy paths automatically. It uses depth-based organization to
 preserve your folder structure at specified levels.
 
-### New in v1.3.1:
-- **Depth-based processing** with `-i` (input depth) and `-o` (output depth) for precise folder control
-- **Interactive folder selection** with `--select` flag
-- **Direct folder filtering** with `--filter` option
-- **Clean proxy generation** without burn-in overlays using `-c` flag
-
 **Positional arguments:**
 - `args` - Positional arguments for backward compatibility
 
@@ -112,8 +106,6 @@ preserve your folder structure at specified levels.
 - `-d, --dataset {1,2}` - Select dataset: 1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)
 - `-c, --clean-image` - Generate clean proxies without burn-in overlays
 - `-h, --help` - Show help message and exit
-
-### Examples
 
 **Directory Mode:**
 ```zsh
