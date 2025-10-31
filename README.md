@@ -78,7 +78,7 @@ In our workflow,We place the Proxy folder alongside the Footage folder, feel fre
 
 This script supports two modes:
 1. **Directory Mode**: Process footage folders within a directory tree with automatic bin organization
-2. **JSON Mode**: Re-generate missing proxies based on [Video_file_compare](https://github.com/UserProjekt/video_file_compare) results from a JSON file
+2. **JSON Mode**: Re-generate missing proxies based on [File_Compare](https://github.com/UserProjekt/File_Compare) results from a JSON file
 
 The script creates organized bin structures in DaVinci Resolve based on your folder hierarchy,
 imports footage, and sets up proxy paths automatically. It uses depth-based organization to
