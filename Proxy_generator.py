@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 __author__ = 'userprojekt'
 
 
@@ -325,11 +325,26 @@ def process_json_mode(json_path, proxy_path, dataset, in_depth, out_depth,
         print(f"Error reading JSON file: {e}")
         sys.exit(1)
     
+    # Validate dataset parameter
+    if dataset not in [1, 2]:
+        print(f"Error: Invalid dataset value '{dataset}'. Must be 1 or 2.")
+        sys.exit(1)
+    
     # Get the selected file list
     if dataset == 1:
         file_list = comparison_data.get('files_only_in_group1', [])
-    else:
+        # Add frame mismatch files from group 1 if they exist
+        if 'frame_count_mismatches' in comparison_data:
+            mismatch_files = [mismatch['path1'] for mismatch in comparison_data['frame_count_mismatches']]
+            file_list.extend(mismatch_files)
+            print(f"Added {len(mismatch_files)} files from frame count mismatches (group 1)")
+    else:  # dataset == 2
         file_list = comparison_data.get('files_only_in_group2', [])
+        # Add frame mismatch files from group 2 if they exist
+        if 'frame_count_mismatches' in comparison_data:
+            mismatch_files = [mismatch['path2'] for mismatch in comparison_data['frame_count_mismatches']]
+            file_list.extend(mismatch_files)
+            print(f"Added {len(mismatch_files)} files from frame count mismatches (group 2)")
     
     if not file_list:
         print(f"No files found in group{dataset}")
