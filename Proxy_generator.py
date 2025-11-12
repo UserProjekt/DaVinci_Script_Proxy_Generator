@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.3.2"
+__version__ = "1.3.3"
 __author__ = 'userprojekt'
 
 
@@ -33,44 +33,92 @@ def clean_path_input(path):
     path = path.strip('" ').strip()
     return path
 
-def organize_files_by_structure(file_paths, in_depth, out_depth):
-    """Organize files based on input/output depth ranges"""
+def compute_key_path(parts, in_depth, *, leading_sep=None):
+    """
+    Build the path key used to group items at a given depth.
+
+    Parameters
+    ----------
+    parts : list[str]
+        Path segments with empty components already stripped out.
+    in_depth : int
+        Number of leading components to include in the key.
+    leading_sep : bool | None, optional
+        When True, prefix the key with the platform separator (useful on POSIX).
+        When False, return the raw join.
+        When None (default), prefix only on POSIX.
+
+    Returns
+    -------
+    str | None
+        The constructed key path, or None if the parts list is too short.
+    """
+    if in_depth <= 0:
+        raise ValueError("in_depth must be a positive integer")
+
+    if len(parts) < in_depth:
+        return None
+
+    key_components = parts[:in_depth]
+    key_path = os.path.join(*key_components)
+
+    if leading_sep is None:
+        leading_sep = (os.sep == '/')
+
+    if leading_sep and not key_path.startswith(os.sep):
+        key_path = os.sep + key_path
+
+    return key_path
+
+
+def organize_json_mode_files(file_paths, in_depth, out_depth):
+    """Organize files based on input/output depth ranges."""
     organized_files = {}
-    
+
     for file_path in file_paths:
-        # Split path into parts
         parts = file_path.split(os.sep)
         parts_clean = [p for p in parts if p]
-        
-        # Skip files that don't have enough depth
-        if len(parts_clean) <= in_depth:
+
+        key_path = compute_key_path(parts_clean, in_depth)
+        if key_path is None:
             continue
-        
-        # Extract the key path (what we'll use as the main folder)
-        # This is at in_depth level
-        if os.sep == '/':  # Unix-like
-            key_path = '/' + os.path.join(*parts_clean[:in_depth])
-        else:  # Windows
-            key_path = os.path.join(*parts_clean[:in_depth])
-        
-        # Extract subfolder structure between in_depth and out_depth
+
         if out_depth > in_depth:
             subfolder_parts = parts_clean[in_depth:out_depth]
             subfolder_key = os.sep.join(subfolder_parts) if subfolder_parts else ""
         else:
             subfolder_key = ""
-        
-        # Initialize structure
+
         if key_path not in organized_files:
             organized_files[key_path] = {}
         if subfolder_key not in organized_files[key_path]:
             organized_files[key_path][subfolder_key] = []
-        
+
         organized_files[key_path][subfolder_key].append(file_path)
-    
+
     return organized_files
 
-def filter_folders_at_in_depth(organized_files, in_depth, filter_mode=None, filter_list=None):
+
+def organize_directory_mode_folders(folders, in_depth):
+    """Special organization for when in_depth == out_depth in directory mode."""
+    organized_files = {}
+
+    for folder in folders:
+        parts = folder.split(os.sep)
+        parts_clean = [p for p in parts if p]
+
+        key_path = compute_key_path(parts_clean, in_depth)
+        if key_path is None:
+            continue
+
+        if key_path not in organized_files:
+            organized_files[key_path] = {}
+
+        organized_files[key_path][""] = [folder]
+
+    return organized_files
+
+def filter_folders_at_in_depth(organized_files, in_depth, filter_mode=None, filter_list=None, show_full_path=False):
     """Filter organized files based on folder selection at input depth"""
     
     if not filter_mode:
@@ -85,13 +133,19 @@ def filter_folders_at_in_depth(organized_files, in_depth, filter_mode=None, filt
     if filter_mode == 'select':
         # Interactive selection
         print(f"\nFolders available at depth {in_depth}:")
-        folder_list = sorted(folder_map.keys())
+        
+        # Sort by full path for consistent ordering
+        sorted_paths = sorted(organized_files.keys())
         
         # Show folder list with file counts
-        for i, folder in enumerate(folder_list, 1):
-            full_path = folder_map[folder]
+        for i, full_path in enumerate(sorted_paths, 1):
             file_count = sum(len(files) for files in organized_files[full_path].values())
-            print(f"{i}. {folder} ({file_count} files)")
+            # Display full path when show_full_path is True
+            if show_full_path:
+                print(f"{i}. {full_path} ({file_count} files)")
+            else:
+                folder_name = os.path.basename(full_path.rstrip(os.sep))
+                print(f"{i}. {folder_name} ({file_count} files)")
         
         print("\nSelect folders to process:")
         print("Enter numbers (comma-separated), range (e.g., 2-4), or 'all':")
@@ -100,20 +154,18 @@ def filter_folders_at_in_depth(organized_files, in_depth, filter_mode=None, filt
         if choice.lower() == 'all':
             return organized_files
         
-        selected_indices = parse_selection(choice, len(folder_list))
-        selected_folders = [folder_list[i] for i in selected_indices]
+        selected_indices = parse_selection(choice, len(sorted_paths))
+        selected_paths = [sorted_paths[i] for i in selected_indices]
         
         # Filter the organized_files dict
         filtered = {}
-        for folder_name in selected_folders:
-            if folder_name in folder_map:
-                full_path = folder_map[folder_name]
-                filtered[full_path] = organized_files[full_path]
+        for full_path in selected_paths:
+            filtered[full_path] = organized_files[full_path]
         
         return filtered
     
     elif filter_mode == 'filter' and filter_list:
-        # Similar logic for filter mode...
+        # Filter mode with list
         filter_names = [f.strip() for f in filter_list.split(',')]
         
         filtered = {}
@@ -363,15 +415,20 @@ def process_json_mode(json_path, proxy_path, dataset, in_depth, out_depth,
     if file_list:
         example = file_list[0]
         parts = [p for p in example.split(os.sep) if p]
-        print(f"\nExample file: {example}")
-        print(f"Will extract: {os.sep.join(parts[in_depth-1:out_depth])}")
+        if len(parts) >= in_depth:
+            if in_depth == out_depth:
+                print(f"\nExample file: {example}")
+                print(f"Will use folder at depth {in_depth}: {parts[in_depth-1]}")
+            else:
+                print(f"\nExample file: {example}")
+                print(f"Will extract: {os.sep.join(parts[in_depth-1:out_depth])}")
     
     # Organize files
-    organized_files = organize_files_by_structure(file_list, in_depth, out_depth)
+    organized_files = organize_json_mode_files(file_list, in_depth, out_depth)
     
-    # Apply folder filtering if requested
+    # Apply folder filtering if requested (show full paths in select mode)
     organized_files = filter_folders_at_in_depth(
-        organized_files, in_depth, filter_mode, filter_list
+        organized_files, in_depth, filter_mode, filter_list, show_full_path=True
     )
     
     if not organized_files:
@@ -432,36 +489,43 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
         target_folders = []
         max_depth_found = in_depth
         
-        # Walk through this input folder to find folders at output depth or max depth
-        for root, dirs, files in os.walk(input_folder):
-            root_parts = [p for p in root.split(os.sep) if p]
-            current_depth = len(root_parts)
-            
-            # Track the maximum depth found for this input folder
-            if current_depth > max_depth_found:
-                max_depth_found = current_depth
-            
-            # Collect folders at exactly out_depth
-            if current_depth == out_depth:
-                target_folders.append(root)
-                dirs.clear()  # Don't go deeper
-            elif current_depth > out_depth:
-                dirs.clear()  # Don't go deeper than output depth
-        
-        # If no folders found at output depth, use folders at max depth found
-        if not target_folders and max_depth_found < out_depth:
-            # Re-walk to get folders at max depth
+        # Special case: when in_depth == out_depth, we want to import the folder itself
+        if in_depth == out_depth:
+            # The input folder itself is the target
+            target_folders.append(input_folder)
+            folder_max_depths[input_folder] = in_depth
+        else:
+            # Walk through this input folder to find folders at output depth or max depth
             for root, dirs, files in os.walk(input_folder):
                 root_parts = [p for p in root.split(os.sep) if p]
                 current_depth = len(root_parts)
                 
-                if current_depth == max_depth_found:
+                # Track the maximum depth found for this input folder
+                if current_depth > max_depth_found:
+                    max_depth_found = current_depth
+                
+                # Collect folders at exactly out_depth
+                if current_depth == out_depth:
                     target_folders.append(root)
+                    dirs.clear()  # Don't go deeper
+                elif current_depth > out_depth:
+                    dirs.clear()  # Don't go deeper than output depth
+            
+            # If no folders found at output depth, use folders at max depth found
+            if not target_folders and max_depth_found < out_depth:
+                # Re-walk to get folders at max depth
+                for root, dirs, files in os.walk(input_folder):
+                    root_parts = [p for p in root.split(os.sep) if p]
+                    current_depth = len(root_parts)
+                    
+                    if current_depth == max_depth_found:
+                        target_folders.append(root)
+            
+            folder_max_depths[input_folder] = max_depth_found
         
         # Store the results
         if target_folders:
             target_folders_by_input[input_folder] = target_folders
-            folder_max_depths[input_folder] = max_depth_found
         else:
             # If input folder has no subfolders, include itself
             target_folders_by_input[input_folder] = [input_folder]
@@ -470,19 +534,14 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
     # Apply filtering at input depth level
     if filter_mode == 'select':
         print(f"\nFolders available at depth {in_depth}:")
-        folder_names = []
-        folder_paths = []
+        folder_paths = sorted(target_folders_by_input.keys())
         
-        for input_folder, targets in target_folders_by_input.items():
-            folder_name = os.path.basename(input_folder)
+        for i, input_folder in enumerate(folder_paths, 1):
             actual_depth = folder_max_depths[input_folder]
             depth_info = f" (max depth: {actual_depth})" if actual_depth < out_depth else ""
-            folder_names.append(f"{folder_name}{depth_info}")
-            folder_paths.append(input_folder)
-        
-        for i, folder_name in enumerate(folder_names, 1):
-            target_count = len(target_folders_by_input[folder_paths[i-1]])
-            print(f"{i}. {folder_name} - {target_count} folders")
+            target_count = len(target_folders_by_input[input_folder])
+            # Show full path
+            print(f"{i}. {input_folder}{depth_info} - {target_count} folders")
         
         print("\nSelect folders to process:")
         print("Enter numbers (comma-separated), range (e.g., 2-4), or 'all':")
@@ -528,7 +587,12 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
     print(f"\nTotal folders to process: {len(all_target_folders)}")
     
     # Organize for processing
-    organized_files = organize_files_by_structure(all_target_folders, in_depth, out_depth)
+    if in_depth == out_depth:
+        # When depths are the same, use special organization function
+        organized_files = organize_directory_mode_folders(all_target_folders, in_depth)
+    else:
+        # Different depths - use regular organization
+        organized_files = organize_json_mode_files(all_target_folders, in_depth, out_depth)
     
     if not organized_files:
         # Fallback for simple case
@@ -565,15 +629,9 @@ up to the specified subfolder level.''',
   JSON mode:
     %(prog)s -j comparison.json -d 1 -p /path/to/proxy -i 4 -o 4          # Include depth 4
 
-  Interactive selection of Shooting day folders
+  Interactive selection of folders (shows full paths):
     %(prog)s -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --select  # Include depth 4-5, selecting from depth 4
-    # Will show:
-    # 1. Shooting_Day_1 (150 files)
-    # 2. Shooting_Day_2  (200 files)
-    # 3. Shooting_Day_3  (180 files)
-    # 4. Shooting_Day_4  (220 files)
-    # 5. Shooting_Day_5  (190 files)
-    # Enter: 2-4  (to select Shooting_Day_2, Shooting_Day_3, Shooting_Day_3)       # Selected Shooting day
+    # Will show full paths of available folders at depth 4
 
   Direct filtering
     %(prog)s -f /volume/Production/Footage/ -p /proxy -i 4 -o 5 --filter "Shooting_Day_2,Shooting_Day_3"  # Specific Date
