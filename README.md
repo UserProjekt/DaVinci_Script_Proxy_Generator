@@ -4,7 +4,7 @@ This script, written in Python for DaVinci Resolve, automates the process of imp
 
 This preset is configured for Full High Definition (FHD) video with H.265 encoding, 4:2:0 chroma subsampling, 8-bit color depth, and a video bitrate of 5Mbps. These settings are optimized for hardware decoding and systems with low I/O performance. Reduced file size is also better for transfer and storage.
 
-Ensure you have a render preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 280:
+Ensure you have a render preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 332:
 
       
       Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
@@ -12,7 +12,7 @@ Ensure you have a render preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively,
 
 The script automatically applies source clip name and source timecode overlay burn-ins to the generated proxies by default. This feature uses a custom data burn-in preset titled 'Burn-in' and can be disabled manually if needed.
 
-Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 181:
+Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 233:
   
     
       Project.LoadBurnInPreset("burn-in")
