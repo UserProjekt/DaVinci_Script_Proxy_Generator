@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.3.3"
+__version__ = "1.4.0"
 __author__ = 'userprojekt'
 
 
@@ -34,25 +34,7 @@ def clean_path_input(path):
     return path
 
 def compute_key_path(parts, in_depth, *, leading_sep=None):
-    """
-    Build the path key used to group items at a given depth.
-
-    Parameters
-    ----------
-    parts : list[str]
-        Path segments with empty components already stripped out.
-    in_depth : int
-        Number of leading components to include in the key.
-    leading_sep : bool | None, optional
-        When True, prefix the key with the platform separator (useful on POSIX).
-        When False, return the raw join.
-        When None (default), prefix only on POSIX.
-
-    Returns
-    -------
-    str | None
-        The constructed key path, or None if the parts list is too short.
-    """
+    """Build the path key used to group items at a given depth."""
     if in_depth <= 0:
         raise ValueError("in_depth must be a positive integer")
 
@@ -232,6 +214,47 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
     if not clean_image:
         Project.LoadBurnInPreset("burn-in")
 
+    # Helper function to calculate proxy dimensions
+    def calculate_proxy_dimensions(resolution_str):
+        width, height = resolution_str.split("x")
+        int_w = int(width)
+        int_h = int(height)
+        aspect = int_w / int_h
+        proxy_height = "1080"
+        int_proxy_width = round(int(proxy_height) * aspect)
+        if int_proxy_width % 2 == 1:
+            int_proxy_width += 1
+        return str(int_proxy_width), proxy_height
+
+    # Helper function to setup timeline and render job
+    def setup_timeline_and_render(clips, timeline_name, resolution_str, render_preset, target_dir):
+        if not clips:
+            return
+        
+        timeline = MediaPool.CreateTimelineFromClips(timeline_name, clips)
+        proxy_width, proxy_height = calculate_proxy_dimensions(resolution_str)
+        
+        # Set timeline settings
+        timeline.SetSetting("useCustomSettings", "1")
+        timeline.SetSetting("timelineResolutionWidth", proxy_width)
+        timeline.SetSetting("timelineResolutionHeight", proxy_height)
+        
+        # Load render preset
+        Project.LoadRenderPreset(render_preset)
+        
+        # Set render settings
+        Project.SetRenderSettings({
+            "SelectAllFrames": True,
+            "FormatWidth": int(proxy_width),
+            "FormatHeight": int(proxy_height),
+            "TargetDir": target_dir,
+        })
+        
+        # Add render job
+        Project.AddRenderJob()
+        
+        return timeline
+
     # Process each selected footage folder
     for footage_folder_path in selected_footage_folders:
         footage_folder_name = os.path.basename(footage_folder_path)
@@ -284,12 +307,13 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
                     print(f"    Failed to import items")
                     continue
                 
-                # Create resolution-based subfolders
+                # Create resolution-based subfolders and organize by audio tracks
                 for uncat_clip in uncat_clips:
                     resolution = uncat_clip.GetClipProperty("Resolution")
                     clip_type = uncat_clip.GetClipProperty("Type")
                     
                     if clip_type != "Still":
+                        # Get or create resolution folder
                         resolution_folder_list = working_folder.GetSubFolderList()
                         resolution_folder_names = [f.GetName() for f in resolution_folder_list]
                         
@@ -298,57 +322,80 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
                         else:
                             resolution_folder = next(f for f in resolution_folder_list if f.GetName() == resolution)
                         
-                        # Move clip to resolution folder
-                        MediaPool.MoveClips([uncat_clip], resolution_folder)
+                        # Check audio track count
+                        audio_track_count = uncat_clip.GetClipProperty("Audio Ch")
+                        try:
+                            audio_tracks = int(audio_track_count) if audio_track_count else 0
+                        except:
+                            audio_tracks = 0
+                        
+                        # If more than 4 audio tracks, create/use a subfolder
+                        if audio_tracks > 4:
+                            multi_audio_folder_name = "MultiAudio_5+"
+                            resolution_subfolders = resolution_folder.GetSubFolderList()
+                            resolution_subfolder_names = [f.GetName() for f in resolution_subfolders]
+                            
+                            if multi_audio_folder_name not in resolution_subfolder_names:
+                                target_folder = MediaPool.AddSubFolder(resolution_folder, multi_audio_folder_name)
+                            else:
+                                target_folder = next(f for f in resolution_subfolders if f.GetName() == multi_audio_folder_name)
+                        else:
+                            target_folder = resolution_folder
+                        
+                        # Move clip to appropriate folder
+                        MediaPool.MoveClips([uncat_clip], target_folder)
                         MediaPool.SetCurrentFolder(working_folder)
                 
-                # Create timelines for each resolution
+                # Create timelines for each resolution and audio configuration
                 resolution_folder_list = working_folder.GetSubFolderList()
                 for resolution_folder in resolution_folder_list:
-                    clips = resolution_folder.GetClipList()
-                    if not clips:
-                        continue
-                    
                     resolution_folder_name = resolution_folder.GetName()
-                    timeline_name = f"Video Resolution {resolution_folder_name}   #{next(c)}"
-                    timeline = MediaPool.CreateTimelineFromClips(timeline_name, clips)
-                    
-                    # Set render settings
-                    width, height = resolution_folder_name.split("x")
-                    int_w = int(width)
-                    int_h = int(height)
-                    aspect = int_w / int_h
-                    proxy_height = "1080"
-                    int_proxy_width = round(int(proxy_height) * aspect)
-                    if int_proxy_width % 2 == 1:
-                        int_proxy_width += 1
-                    proxy_width = str(int_proxy_width)
-                    
-                    timeline.SetSetting("useCustomSettings", "1")
-                    timeline.SetSetting("timelineResolutionWidth", proxy_width)
-                    timeline.SetSetting("timelineResolutionHeight", proxy_height)
-                    
-                    # Load render preset
-                    Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
-                    
-                    # Build target directory using the same subfolder structure
                     footage_folder_name = os.path.basename(footage_folder_path)
-                    if subfolder_parts:
-                        target_dir = os.path.join(proxy_folder_path, footage_folder_name, *subfolder_parts)
-                    else:
-                        target_dir = os.path.join(proxy_folder_path, footage_folder_name)
                     
-                    print(f"    Render target: {target_dir}")
+                    # Process clips directly in resolution folder (≤4 audio tracks)
+                    standard_clips = resolution_folder.GetClipList()
+                    if standard_clips:
+                        timeline_name = f"Video Resolution {resolution_folder_name}   #{next(c)}"
+                        
+                        # Build target directory
+                        if subfolder_parts:
+                            target_dir = os.path.join(proxy_folder_path, footage_folder_name, *subfolder_parts)
+                        else:
+                            target_dir = os.path.join(proxy_folder_path, footage_folder_name)
+                        
+                        print(f"    Render target (standard audio): {target_dir}")
+                        
+                        setup_timeline_and_render(
+                            standard_clips,
+                            timeline_name,
+                            resolution_folder_name,
+                            'FHD_h.265_420_8bit_5Mbps',
+                            target_dir
+                        )
                     
-                    Project.SetRenderSettings({
-                        "SelectAllFrames": True,
-                        "FormatWidth": int(proxy_width),
-                        "FormatHeight": int(proxy_height),
-                        "TargetDir": target_dir,
-                    })
-                    
-                    # Add render job
-                    Project.AddRenderJob()
+                    # Process MultiAudio subfolder if it exists (>4 audio tracks)
+                    multi_audio_subfolders = resolution_folder.GetSubFolderList()
+                    for subfolder in multi_audio_subfolders:
+                        if subfolder.GetName() == "MultiAudio_5+":
+                            multi_audio_clips = subfolder.GetClipList()
+                            if multi_audio_clips:
+                                timeline_name = f"Video Resolution {resolution_folder_name} MultiAudio   #{next(c)}"
+                                
+                                # Build target directory with MultiAudio subfolder
+                                if subfolder_parts:
+                                    target_dir = os.path.join(proxy_folder_path, footage_folder_name, *subfolder_parts, "MultiAudio_5+")
+                                else:
+                                    target_dir = os.path.join(proxy_folder_path, footage_folder_name, "MultiAudio_5+")
+                                
+                                print(f"    Render target (multi-audio): {target_dir}")
+                                
+                                setup_timeline_and_render(
+                                    multi_audio_clips,
+                                    timeline_name,
+                                    resolution_folder_name,
+                                    'FHD_prores_proxy',
+                                    target_dir
+                                )
                     
             except Exception as e:
                 print(f"    Error processing items: {e}")

@@ -1,22 +1,21 @@
 # DaVinci_Script_Proxy_Generator
 
-This script, written in Python for DaVinci Resolve, automates the process of importing video footage and generating proxies. It categorizes the footage based on the video aspect ratio, then transcodes it to an approximate resolution of 1920x1080 using a custom DaVinci Resolve render preset titled 'FHD_h.265_420_8bit_5Mbps'. 
+This script, written in Python for DaVinci Resolve, automates the process of importing video footage and generating proxies. It categorizes the footage based on the video aspect ratio, then transcodes it to an approximate resolution of 1920x1080 using custom DaVinci Resolve render presets. 
 
 This preset is configured for Full High Definition (FHD) video with H.265 encoding, 4:2:0 chroma subsampling, 8-bit color depth, and a video bitrate of 5Mbps. These settings are optimized for hardware decoding and systems with low I/O performance. Reduced file size is also better for transfer and storage.
 
-Ensure you have a render preset named 'FHD_h.265_420_8bit_5Mbps'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 332:
+Due to an issue with Adobe Premiere, which cannot use hardware decoding for 4:2:0 8-bit H.265 with 8 audio tracks (Sony XAVC-I codec), this script automatically selects the codec based on the number of audio channels in the video file:
 
       
-      Project.LoadRenderPreset('FHD_h.265_420_8bit_5Mbps')
-      
+      audio channels > 4  → ProRes Proxy
+      audio channels ≤ 4 → 4:2:0 8-bit H.265
+       
+
+Ensure you have a davinci render preset named 'FHD_h.265_420_8bit_5Mbps' and 'FHD_prores_proxy'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 372 and line 396.
 
 The script automatically applies source clip name and source timecode overlay burn-ins to the generated proxies by default. This feature uses a custom data burn-in preset titled 'Burn-in' and can be disabled manually if needed.
 
-Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 233:
-  
-    
-      Project.LoadBurnInPreset("burn-in")
-    
+Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 215.    
 
 ## Prerequisites
 Python >= 3.6 64-bit  
