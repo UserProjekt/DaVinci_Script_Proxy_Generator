@@ -15,7 +15,7 @@ Ensure you have a davinci render preset named 'FHD_h.265_420_8bit_5Mbps' and 'FH
 
 The script automatically applies source clip name and source timecode overlay burn-ins to the generated proxies by default. This feature uses a custom data burn-in preset titled 'Burn-in' and can be disabled manually if needed.
 
-Ensure you have a data burn-in preset named 'Burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 215.    
+Ensure you have a data burn-in preset named 'burn-in'. Alternatively, you can create your own preset and update its name in Proxy_generator.py on line 215.    
 
 ## Prerequisites
 Python >= 3.6 64-bit  
