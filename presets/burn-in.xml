@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--DbAppVer="19.1.2.0003" DbPrjVer="14"-->
+<FontRenderItemVec DbId="20582ed0-0150-4775-9a7a-d21d8a888455">
+ <FieldsBlob/>
+ <InheritedCollection>
+  <Element>
+   <FontRenderItem DbId="b487e3c9-3067-4770-864f-5c1600984154">
+    <FieldsBlob>0000000100000002000000160054006500780074004f00700061006300690074007900000087003fe0000440000000000000100046006f006e007400530069007a006500000087003f9c71c720000000</FieldsBlob>
+    <Text/>
+    <FontDesc>Courier New,-1,30,5,50,0,0,0,0,0</FontDesc>
+    <Type>4</Type>
+    <X>0.796875</X>
+    <Y>0.027777791023254395</Y>
+    <ForegroundColor>
+     <Element>1</Element>
+     <Element>1</Element>
+     <Element>1</Element>
+    </ForegroundColor>
+    <BackgroundColor>
+     <Element>0</Element>
+     <Element>0</Element>
+     <Element>0</Element>
+    </BackgroundColor>
+    <Opacity>0.5020009279251099</Opacity>
+    <HorzAlign>0</HorzAlign>
+    <IsFadeUp>false</IsFadeUp>
+    <FadeUp>0</FadeUp>
+    <IsFadeDown>false</IsFadeDown>
+    <FadeDown>0</FadeDown>
+    <Logo/>
+    <IsRenderTextPrefixed>true</IsRenderTextPrefixed>
+   </FontRenderItem>
+  </Element>
+  <Element>
+   <FontRenderItem DbId="df94bcfb-7d2c-46a1-bae2-acf30637bfac">
+    <FieldsBlob>0000000100000002000000160054006500780074004f00700061006300690074007900000087003fe0000440000000000000100046006f006e007400530069007a006500000087003f9c71c720000000</FieldsBlob>
+    <Text/>
+    <FontDesc>Courier New,-1,30,5,50,0,0,0,0,0</FontDesc>
+    <Type>256</Type>
+    <X>0.015625</X>
+    <Y>0.027777791023254395</Y>
+    <ForegroundColor>
+     <Element>1</Element>
+     <Element>1</Element>
+     <Element>1</Element>
+    </ForegroundColor>
+    <BackgroundColor>
+     <Element>0</Element>
+     <Element>0</Element>
+     <Element>0</Element>
+    </BackgroundColor>
+    <Opacity>0.5020009279251099</Opacity>
+    <HorzAlign>0</HorzAlign>
+    <IsFadeUp>false</IsFadeUp>
+    <FadeUp>0</FadeUp>
+    <IsFadeDown>false</IsFadeDown>
+    <FadeDown>0</FadeDown>
+    <Logo/>
+    <IsRenderTextPrefixed>true</IsRenderTextPrefixed>
+   </FontRenderItem>
+  </Element>
+ </InheritedCollection>
+</FontRenderItemVec>
