@@ -4,10 +4,10 @@ This script, written in Python for DaVinci Resolve, automates the process of imp
 
 This preset is configured for Full High Definition (FHD) video with H.265 encoding, 4:2:0 chroma subsampling, 8-bit color depth, and a video bitrate of 5Mbps. These settings are optimized for hardware decoding and systems with low I/O performance. Reduced file size is also better for transfer and storage.
 
-Due to an issue with Adobe Premiere, which cannot use hardware decoding for 4:2:0 8-bit H.265 with 8 audio tracks (Sony XAVC-I codec), this script automatically selects the codec based on the number of audio channels in the video file:
+Due to an issue of Adobe Premiere, which cannot use hardware decoding for 4:2:0 8-bit H.265 with 8 audio tracks (Sony XAVC-I codec), this script automatically selects the codec based on the number of audio channels in the video file:
 
       
-      audio channels > 4  → ProRes Proxy
+      audio channels > 4 → ProRes Proxy
       audio channels ≤ 4 → 4:2:0 8-bit H.265
        
 
@@ -98,12 +98,16 @@ preserve your folder structure at specified levels.
 - `-o, --out-depth OUT_DEPTH` - Directory depth to include up to (default: 4, typically Shooting day folder)
 
 **Folder selection (mutually exclusive):**
-- `--select` - Interactively select which folders to process at input depth
+- `-s, --select` - Interactively select which folders to process at input depth
 - `--filter FILTER` - Comma-separated list of folder names to process
 
 **Optional arguments:**
 - `-d, --dataset {1,2}` - Select dataset: 1 for files_only_in_group1, 2 for files_only_in_group2 (JSON mode only)
 - `-c, --clean-image` - Generate clean proxies without burn-in overlays
+- `-C, --codec {auto,prores,h265,hevc,265}` - Override render preset:
+                             'prores' → FHD_prores_proxy
+                             'h265/hevc/265' → FHD_h.265_420_8bit_5Mbps
+                             default: auto(automatically selects the codec based on the number of audio channels in the video file)
 - `-h, --help` - Show help message and exit
 
 **Directory Mode:**

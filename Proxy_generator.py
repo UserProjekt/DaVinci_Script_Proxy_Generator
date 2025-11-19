@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 __author__ = 'userprojekt'
 
 
@@ -193,7 +193,7 @@ def parse_selection(choice, max_num):
     
     return sorted(set(indices))  # Remove duplicates and sort
 
-def process_files_in_resolve(organized_files, selected_footage_folders, proxy_folder_path, subfolder_depth, is_directory_mode=False, clean_image=False):
+def process_files_in_resolve(organized_files, selected_footage_folders, proxy_folder_path, subfolder_depth, is_directory_mode=False, clean_image=False, codec='auto'):
     """Process files in DaVinci Resolve"""
     # Create project with appropriate name based on mode
     ProjectManager = resolve.GetProjectManager()
@@ -209,6 +209,15 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
     MediaStorage = resolve.GetMediaStorage()
     MediaPool = Project.GetMediaPool()
     RootFolder = MediaPool.GetRootFolder()
+
+    codec = codec.lower()
+    if codec in ('h265', 'hevc', '265'):
+        standard_preset = multi_audio_preset = 'FHD_h.265_420_8bit_5Mbps'
+    elif codec == 'prores':
+        standard_preset = multi_audio_preset = 'FHD_prores_proxy'
+    else:  # auto
+        standard_preset = 'FHD_h.265_420_8bit_5Mbps'
+        multi_audio_preset = 'FHD_prores_proxy'
     
     # Only load burn-in preset if not in clean mode
     if not clean_image:
@@ -369,7 +378,7 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
                             standard_clips,
                             timeline_name,
                             resolution_folder_name,
-                            'FHD_h.265_420_8bit_5Mbps',
+                            standard_preset,
                             target_dir
                         )
                     
@@ -383,9 +392,9 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
                                 
                                 # Build target directory with MultiAudio subfolder
                                 if subfolder_parts:
-                                    target_dir = os.path.join(proxy_folder_path, footage_folder_name, *subfolder_parts, "MultiAudio_5+")
+                                    target_dir = os.path.join(proxy_folder_path, footage_folder_name, *subfolder_parts)
                                 else:
-                                    target_dir = os.path.join(proxy_folder_path, footage_folder_name, "MultiAudio_5+")
+                                    target_dir = os.path.join(proxy_folder_path, footage_folder_name)
                                 
                                 print(f"    Render target (multi-audio): {target_dir}")
                                 
@@ -393,7 +402,7 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
                                     multi_audio_clips,
                                     timeline_name,
                                     resolution_folder_name,
-                                    'FHD_prores_proxy',
+                                    multi_audio_preset,
                                     target_dir
                                 )
                     
@@ -413,7 +422,7 @@ def process_files_in_resolve(organized_files, selected_footage_folders, proxy_fo
         print("Project saved. You can start rendering manually in DaVinci Resolve.")
 
 def process_json_mode(json_path, proxy_path, dataset, in_depth, out_depth, 
-                      clean_image=False, filter_mode=None, filter_list=None):
+                      clean_image=False, filter_mode=None, filter_list=None, codec='auto'):
     """Process using JSON file with input/output depth and folder filtering"""
 
     # Read JSON file
@@ -487,10 +496,10 @@ def process_json_mode(json_path, proxy_path, dataset, in_depth, out_depth,
     subfolder_depth = out_depth - in_depth
     
     process_files_in_resolve(organized_files, selected_folders, proxy_path, 
-                            subfolder_depth, is_directory_mode=False, clean_image=clean_image)
+                            subfolder_depth, is_directory_mode=False, clean_image=clean_image, codec=codec)
 
 def process_directory_mode(footage_path, proxy_path, in_depth, out_depth, 
-                          clean_image=False, filter_mode=None, filter_list=None):
+                          clean_image=False, filter_mode=None, filter_list=None, codec='auto'):
     """Process footage folder with absolute input/output depths"""
 
     if not os.path.exists(footage_path):
@@ -650,7 +659,7 @@ def process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
     subfolder_depth = out_depth - in_depth
     
     process_files_in_resolve(organized_files, selected_folders, proxy_path, subfolder_depth,
-                            is_directory_mode=True, clean_image=clean_image)
+                            is_directory_mode=True, clean_image=clean_image, codec=codec)
 
 def is_json_file(path):
     """Check if the path is likely a JSON file"""
@@ -698,7 +707,7 @@ up to the specified subfolder level.''',
 
     # Add folder selection options
     selection_group = parser.add_mutually_exclusive_group()
-    selection_group.add_argument('--select', action='store_true',
+    selection_group.add_argument('-s', '--select', action='store_true',
                                 help='Interactively select which folders to process at input depth')
     selection_group.add_argument('--filter', type=str,
                                 help='Comma-separated list of folder names to process (e.g., "Shooting_Day_2,Shooting_Day_3,Shooting_Day_4")')
@@ -706,6 +715,15 @@ up to the specified subfolder level.''',
     # Add a switch for turn off burn-in
     parser.add_argument('-c', '--clean-image', action='store_true', 
                     help='Generate clean proxies without burn-in overlays')
+
+    # Add codec selection
+    parser.add_argument('-C', '--codec',
+                        choices=['auto', 'prores', 'h265', 'hevc', '265'],
+                        default='auto',
+                        help="Override render preset:"
+                            " 'prores' → FHD_prores_proxy, "
+                             "'h265/hevc/265' → FHD_h.265_420_8bit_5Mbps, "
+                             "default: auto(automatically selects the codec based on the number of audio channels in the video file)")
     
     # Handle positional arguments for backward compatibility
     parser.add_argument('args', nargs='*', help='Positional arguments for default mode')
@@ -792,11 +810,11 @@ up to the specified subfolder level.''',
             # JSON mode
             dataset = args.dataset if args.dataset else 1
             process_json_mode(footage_path, proxy_path, dataset, in_depth, out_depth,
-                            args.clean_image, filter_mode, filter_list)
+                            args.clean_image, filter_mode, filter_list, args.codec)
         else:
             # Directory mode
             process_directory_mode(footage_path, proxy_path, in_depth, out_depth,
-                                 args.clean_image, filter_mode, filter_list)
+                                 args.clean_image, filter_mode, filter_list, args.codec)
     
     else:
         parser.print_help()
