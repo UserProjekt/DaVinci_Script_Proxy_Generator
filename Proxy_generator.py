@@ -4,7 +4,7 @@ DaVinci Script Proxy Generator
 Automates proxy generation for DaVinci Resolve
 """
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 __author__ = 'userprojekt'
 
 
@@ -25,12 +25,17 @@ def counter():
 c = counter()
 
 def clean_path_input(path):
-    # Replace escaped spaces
+    # Handle shell escape sequences (from terminal drag-drop or manual input)
     path = path.replace("\\ ", " ")
-    # Replace escaped hash symbols
     path = path.replace("\\#", "#")
-    # Remove quotes around the path (if any)
+    
+    # Remove surrounding quotes
     path = path.strip('" ').strip()
+    
+    # Normalize drive letter to uppercase on Windows
+    if len(path) >= 2 and path[1] == ':':
+        path = path[0].upper() + path[1:]
+    
     return path
 
 def compute_key_path(parts, in_depth, *, leading_sep=None):
